@@ -11,3 +11,4 @@ DerivedData/
 MobileSdk.xcodeproj
 build/
 *~
+Info.plist

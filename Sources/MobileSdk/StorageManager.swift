@@ -10,26 +10,6 @@ import SpruceIDMobileSdkRs
 //    The following is a stripped-down version of the protocol definition from mobile-sdk-rs against which the storage
 // manager is intended to link.
 
-/*
- public typealias Key = String
- public typealias Value = Data
-
- public enum StorageManagerError: Error {
-     case InvalidLookupKey
-     case CouldNotDecryptValue
-     case StorageFull
-     case CouldNotMakeKey
-     case InternalError
- }
-
- public protocol StorageManagerInterface: AnyObject {
-     func add(key: Key, value: Value) throws
-     func get(key: Key) throws -> Value?
-     func list() throws -> [Key]
-     func remove(key: Key) throws
- }
-  */
-
 /// Store and retrieve sensitive data.
 class StorageManager: NSObject, StorageManagerInterface {
     /// Get the path to the application support dir, appending the given file name to it.

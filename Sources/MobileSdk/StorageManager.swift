@@ -1,7 +1,8 @@
 /// Storage Manager
 ///
-/// Store and retrieve sensitive data.  Data is stored in the Application Support directory of the app, encrypted in place
-/// via the .completeFileProtection option, and marked as excluded from backups so it will not be included in iCloud backps.
+/// Store and retrieve sensitive data.  Data is stored in the Application Support directory of the app, encrypted in
+/// place via the .completeFileProtection option, and marked as excluded from backups so it will not be included in
+/// iCloud backps.
 
 import Foundation
 
@@ -23,20 +24,20 @@ class StorageManager: NSObject, StorageManagerInterface {
 
     private func path(file: String) -> URL? {
         do {
-            //    Get the applications support dir, and tack the name of the thing we're storing on the end of it.  This does
-            // imply that `file` should be a valid filename.
+            //    Get the applications support dir, and tack the name of the thing we're storing on the end of it.
+            // This does imply that `file` should be a valid filename.
 
-            let fm = FileManager.default
+            let fileman = FileManager.default
             let bundle = Bundle.main
 
-            let asdir = try fm.url(for: .applicationSupportDirectory,
+            let asdir = try fileman.url(for: .applicationSupportDirectory,
                                    in: .userDomainMask,
                                    appropriateFor: nil, // Ignored
                                    create: true) // May not exist, make if necessary.
 
-            //    If we create subdirectories in the application support directory, we need to put them in a subdir named
-            // after the app; normally, that's `CFBundleDisplayName` from `info.plist`, but that key doesn't have to be
-            // set, in which case we need to use `CFBundleName`.
+            //    If we create subdirectories in the application support directory, we need to put them in a subdir
+            // named after the app; normally, that's `CFBundleDisplayName` from `info.plist`, but that key doesn't
+            // have to be set, in which case we need to use `CFBundleName`.
 
             guard let appname = bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ??
                 bundle.object(forInfoDictionaryKey: "CFBundleName") as? String
@@ -52,8 +53,8 @@ class StorageManager: NSObject, StorageManagerInterface {
                 datadir = asdir.appendingPathComponent("\(appname)/sprucekit/datastore/")
             }
 
-            if !fm.fileExists(atPath: datadir.path) {
-                try fm.createDirectory(at: datadir, withIntermediateDirectories: true, attributes: nil)
+            if !fileman.fileExists(atPath: datadir.path) {
+                try fileman.createDirectory(at: datadir, withIntermediateDirectories: true, attributes: nil)
             }
 
             return datadir.appendingPathComponent(file)
@@ -91,8 +92,7 @@ class StorageManager: NSObject, StorageManagerInterface {
         guard let file = path(file: key) else { throw StorageManagerError.InternalError }
 
         do {
-            let d = try Data(contentsOf: file)
-            return d
+            return try Data(contentsOf: file)
         } catch {
             throw StorageManagerError.InternalError
         }
@@ -100,8 +100,8 @@ class StorageManager: NSObject, StorageManagerInterface {
 
     /// List the the items in storage.
     ///
-    /// Note that this will list all items in the `application support` directory, potentially including any files created
-    /// by other systems.
+    /// Note that this will list all items in the `application support` directory, potentially including any files
+    /// created by other systems.
     ///
     /// - Returns: a list of items in storage
 
@@ -122,7 +122,7 @@ class StorageManager: NSObject, StorageManagerInterface {
     /// - Parameters:
     ///    - key: the name of the file
     ///
-    /// - Returns: a boolean indicating success; at present, there is no failure path, but this may change in the future
+    /// - Returns: a boolean indicating success; at present, there is no failure path, but this may change
 
     func remove(key: Key) throws {
         guard let file = path(file: key) else { return }
@@ -133,58 +133,6 @@ class StorageManager: NSObject, StorageManagerInterface {
             // It's fine if the file isn't there.
         }
     }
-
-    // Method: sys_test()
-    //    Check to see if everything works.
-
-    /*
-     func sys_test() {
-         let key = "test_key"
-         let value = Data("Some random string of text. 😎".utf8)
-
-         do {
-             try add(key: key, value: value)
-         } catch {
-             print("\(classForCoder):\(#function): Failed add() value for key.")
-             return
-         }
-
-         let keys: [String]
-
-         do {
-            keys = try list()
-         } catch {
-             print("\(classForCoder):\(#function): Failed list().")
-             return
-         }
-
-         print("Keys:")
-         for k in keys {
-             print("  \(k)")
-         }
-
-         do {
-             let payload = try get(key: key)
-
-             if !(payload == value) {
-                 print("\(classForCoder):\(#function): Mismatch between stored & retrieved value.")
-                 return
-             }
-         } catch {
-             print("\(classForCoder):\(#function): Failed get() value for key.")
-             return
-         }
-
-         do {
-             try remove(key: key)
-         } catch {
-             print("\(classForCoder):\(#function): Failed remove() value for key.")
-             return
-         }
-
-         print("\(classForCoder):\(#function): Completed successfully.")
-     }
-     */
 }
 
 //

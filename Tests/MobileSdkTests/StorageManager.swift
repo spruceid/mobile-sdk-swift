@@ -1,8 +1,8 @@
-@testable import SpruceIDMobileSdk
 import XCTest
+@testable import MobileSdk
 
-final class StorageManager: XCTestCase {
-    func storage_test() throws {
+final class StorageManagerTest: XCTestCase {
+    func testStorage() throws {
         let sm = StorageManager()
         let key = "test_key"
         let value = Data("Some random string of text. 😎".utf8)

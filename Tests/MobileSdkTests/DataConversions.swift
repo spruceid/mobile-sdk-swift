@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import SpruceIDMobileSdk
+@testable import MobileSdk
 
 final class DataConversions: XCTestCase {
 

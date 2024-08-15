@@ -83,7 +83,8 @@ public struct QRCodeScanner: View {
     @State private var qrOutput: AVCaptureMetadataOutput = .init()
 
     /// Camera QR Output delegate
-    @StateObject private var qrDelegate = QRScannerDelegate()
+    //@StateObject private var qrDelegate = QRScannerDelegate() // Requires iOS 14.
+    @ObservedObject private var qrDelegate = QRScannerDelegate()
 
     /// Scanned code
     @State private var scannedCode: String = ""

@@ -1,5 +1,5 @@
 import XCTest
-@testable import MobileSdk
+@testable import SpruceIDMobileSdk
 
 final class StorageManagerTest: XCTestCase {
     func testStorage() throws {

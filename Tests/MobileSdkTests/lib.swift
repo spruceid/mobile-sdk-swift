@@ -1,2 +1,2 @@
 import XCTest
-@testable import MobileSdk
+@testable import SpruceIDMobileSdk

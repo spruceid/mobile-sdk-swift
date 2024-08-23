@@ -1,11 +1,11 @@
-name: WalletSdk
+name: MobileSdk
 options:
-  bundleIdPrefix: com.spruceid.wallet.sdk
+  bundleIdPrefix: com.spruceid.mobile.sdk
 packages:
-  SpruceIDWalletSdkRs:
-    url: https://github.com/spruceid/wallet-sdk-rs
-    from: 0.0.4
-    # path: "../wallet-sdk-rs"
+  SpruceIDMobileSdkRs:
+    url: https://github.com/spruceid/mobile-sdk-rs
+    from: 0.0.27
+    # path: "../mobile-sdk-rs"
   SwiftAlgorithms:
     url: https://github.com/apple/swift-algorithms
     from: 1.2.0
@@ -17,30 +17,31 @@ settings:
   GENERATE_INFOPLIST_FILE: YES
   DEVELOPMENT_TEAM: FZVYR3KYL4
 targets:
-  WalletSdk:
+  MobileSdk:
     type: library.dynamic
     platform: iOS
     deploymentTarget: "13.0"
     sources:
       - Sources
     dependencies:
-      - package: SpruceIDWalletSdkRs
+      - package: SpruceIDMobileSdkRs
       - package: SwiftAlgorithms
         product: Algorithms
     scheme:
       testTargets:
-        - WalletSdkTests
+        - MobileSdkTests
     info:
       path: Info.plist
       properties:
         NSBluetoothAlwaysUsageDescription: "Secure transmission of mobile DL data"
+        NSCameraUsageDescription: "QR Code Scanner"
     buildToolPlugins:
       - plugin: SwiftLintPlugin
         package: SwiftLint
-  WalletSdkTests:
+  MobileSdkTests:
     platform: iOS
     type: bundle.unit-test
     sources:
       - Tests
     dependencies:
-      - target: WalletSdk
+      - target: MobileSdk

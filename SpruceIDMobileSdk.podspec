@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
-  spec.name         = "SpruceIDWalletSdk"
-  spec.version      = "0.0.8"
-  spec.summary      = "Swift Wallet SDK."
+  spec.name         = "SpruceIDMobileSdk"
+  spec.version      = "0.0.9"
+  spec.summary      = "Swift Mobile SDK."
   spec.description  = <<-DESC
-                   SpruceID Swift Wallet SDK.
+                   SpruceID Swift Mobile SDK.
                    DESC
-  spec.homepage     = "https://github.com/spruceid/wallet-sdk-swift"
+  spec.homepage     = "https://github.com/spruceid/mobile-sdk-swift"
   spec.license      = { :type => "MIT & Apache License, Version 2.0", :text => <<-LICENSE
                           Refer to LICENSE-MIT and LICENSE-APACHE in the repository.
                         LICENSE
@@ -16,11 +16,11 @@ Pod::Spec.new do |spec|
 
   spec.ios.deployment_target  = '13.0'
 
-  spec.source        = { :git => "https://github.com/spruceid/wallet-sdk-swift.git", :tag => "#{spec.version}" }
-  spec.source_files  = "Sources/WalletSdk/*.swift"
+  spec.source        = { :git => "https://github.com/spruceid/mobile-sdk-swift.git", :tag => "#{spec.version}" }
+  spec.source_files  = "Sources/MobileSdk/*.swift"
 
   spec.static_framework = true
-  spec.dependency 'SpruceIDWalletSdkRs', "~> 0.0.24"
+  spec.dependency 'SpruceIDMobileSdkRs', "~> 0.0.27"
   spec.dependency 'SwiftAlgorithms', "~> 1.0.0"
   spec.frameworks = 'Foundation', 'CoreBluetooth', 'CryptoKit'
 end

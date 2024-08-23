@@ -16,7 +16,7 @@ jobs:
         echo "${{ github.ref_name }}" | grep -P '^[0-9]+\.[0-9]+\.[0-9]+'
     - name: Validate tag matches podspec version
       run: |
-        cat SpruceIDWalletSdk.podspec | grep -P "${{ github.ref_name }}"
+        cat SpruceIDMobileSdk.podspec | grep -P "${{ github.ref_name }}"
 
   main:
     runs-on: macos-latest
@@ -27,4 +27,4 @@ jobs:
       env:
         COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
       run: |
-        pod trunk push SpruceIDWalletSdk.podspec --synchronous
+        pod trunk push SpruceIDMobileSdk.podspec --synchronous

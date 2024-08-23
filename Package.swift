@@ -22,7 +22,7 @@ let package = Package(
         .target(
             name: "SpruceIDWalletSdk",
             dependencies: [
-                .product(name: "MobileSdkRs", package: "wallet-sdk-rs"),
+                .product(name: "SpruceIDMobileSdkRs", package: "wallet-sdk-rs"),
                 .product(name: "Algorithms", package: "swift-algorithms")
             ]
         ),

@@ -5,3 +5,4 @@ disabled_rules:
   - todo
   - file_length
   - force_try
+  - non_optional_string_data_conversion

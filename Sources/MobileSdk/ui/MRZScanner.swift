@@ -321,7 +321,7 @@ public class MRZScannerDelegate: NSObject, ObservableObject, AVCaptureVideoDataO
             guard let candidate = visionResult.topCandidates(maximumCandidates).first else { continue }
 
             if let result = mrzFinder.checkMrz(str: candidate.string) {
-                if result != "nil"{
+                if result != "nil" {
                     codes.append(result)
                 }
             }
@@ -427,7 +427,7 @@ class MRZFinder {
             }
         }
 
-        if mrz == ""{
+        if mrz == "" {
             return nil
         }
 

@@ -343,6 +343,7 @@ class MRZFinder {
     var captureSecond = ""
     var captureThird = ""
     var mrz = ""
+    var tmpMrz = ""
 
     typealias StringObservation = (lastSeen: Int, count: Int)
 
@@ -414,15 +415,15 @@ class MRZFinder {
 
         if captureFirst.count == 30 && captureSecond.count == 30 && captureThird.count == 30 {
             let validChars = Set("ABCDEFGHIJKLKMNOPQRSTUVWXYZ1234567890<")
-            temp_mrz = (
+            tmpMrz = (
                 captureFirst.filter { validChars.contains($0) } + "\n" +
                 captureSecond.filter { validChars.contains($0) } + "\n" +
                 captureThird.filter { validChars.contains($0) }
             ).replacingOccurrences(of: " ", with: "<")
 
-            let checkMrz = temp_mrz.range(of: completeMrzRegex, options: .regularExpression, range: nil, locale: nil)
+            let checkMrz = tmpMrz.range(of: completeMrzRegex, options: .regularExpression, range: nil, locale: nil)
             if checkMrz != nil {
-                mrz = temp_mrz
+                mrz = tmpMrz
             }
         }
 
@@ -453,6 +454,6 @@ class MRZFinder {
         captureSecond = ""
         captureThird = ""
         mrz = ""
-        temp_mrz = ""
+        tmpMrz = ""
     }
 }

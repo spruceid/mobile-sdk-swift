@@ -64,7 +64,6 @@ public struct MRZScanner: View {
     func calculateRegionOfInterest() {
         let desiredHeightRatio = 0.15
         let desiredWidthRatio = 0.6
-        let maxPortraitWidth = 0.8
 
         let size = CGSize(width: desiredWidthRatio, height: desiredHeightRatio)
 
@@ -284,7 +283,7 @@ public class MRZScannerDelegate: NSObject, ObservableObject, AVCaptureVideoDataO
             didOutput sampleBuffer: CMSampleBuffer,
             from connection: AVCaptureConnection
     ) {
-        var request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
+        let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
 
         // This is implemented in VisionViewController.
         if let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
@@ -315,12 +314,9 @@ public class MRZScannerDelegate: NSObject, ObservableObject, AVCaptureVideoDataO
         for visionResult in results {
             guard let candidate = visionResult.topCandidates(maximumCandidates).first else { continue }
 
-            var numberIsSubstring = true
-
             if let result = mrzFinder.checkMrz(str: candidate.string) {
                 if(result != "nil"){
                     codes.append(result)
-                    numberIsSubstring = false
                 }
             }
         }

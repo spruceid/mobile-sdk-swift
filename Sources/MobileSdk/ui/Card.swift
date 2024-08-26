@@ -4,30 +4,42 @@ import SwiftUI
 public struct CardRenderingListView {
     /// An array of keys that will be used to generate an array of values extracted from the credentials
     var titleKeys: [String]
-    /// [OPTIONAL] - Method used to create a custom title field. Receives an array of values based on the array of keys for the same field
-    var titleFormatter: (([String:[String:GenericJSON]]) -> any View)?
+    /**
+    [OPTIONAL] - Method used to create a custom title field. 
+    Receives an array of values based on the array of keys for the same field
+    */
+    var titleFormatter: (([String: [String: GenericJSON]]) -> any View)?
     /// [OPTIONAL] - An array of keys that will be used to generate an array of values extracted from the credentials
     var descriptionKeys: [String]?
-    /// [OPTIONAL] - Method used to create a custom description field. Receives an array of values based on the array of keys for the same fiel
-    var descriptionFormatter: (([String:[String:GenericJSON]]) -> any View)?
+    /**
+    [OPTIONAL] - Method used to create a custom description field. 
+    Receives an array of values based on the array of keys for the same field
+    */
+    var descriptionFormatter: (([String: [String: GenericJSON]]) -> any View)?
     /// [OPTIONAL] - An array of keys that will be used to generate an array of values extracted from the credentials
     var leadingIconKeys: [String]?
-    /// [OPTIONAL] - Method used to create a custom leading icon formatter. Receives an array of values based on the array of keys for the same field
-    var leadingIconFormatter: (([String:[String:GenericJSON]]) -> any View)?
+    /**
+    [OPTIONAL] - Method used to create a custom leading icon formatter. 
+    Receives an array of values based on the array of keys for the same field
+    */
+    var leadingIconFormatter: (([String: [String: GenericJSON]]) -> any View)?
     /// [OPTIONAL] - An array of keys that will be used to generate an array of values extracted from the credentials
     var trailingActionKeys: [String]?
-    /// [OPTIONAL] - Method used to create a custom trailing action button. Receives an array of values based on the array of keys for the same field
-    var trailingActionButton: (([String:[String:GenericJSON]]) -> any View)?
-    
+    /**
+    [OPTIONAL] - Method used to create a custom trailing action button. 
+    Receives an array of values based on the array of keys for the same field
+    */
+    var trailingActionButton: (([String: [String: GenericJSON]]) -> any View)?
+
     public init(
         titleKeys: [String],
-        titleFormatter: (([String:[String:GenericJSON]]) -> any View)? = nil,
+        titleFormatter: (([String: [String: GenericJSON]]) -> any View)? = nil,
         descriptionKeys: [String]? = nil,
-        descriptionFormatter: (([String:[String:GenericJSON]]) -> any View)? = nil,
+        descriptionFormatter: (([String: [String: GenericJSON]]) -> any View)? = nil,
         leadingIconKeys: [String]? = nil,
-        leadingIconFormatter: (([String:[String:GenericJSON]]) -> any View)? = nil,
+        leadingIconFormatter: (([String: [String: GenericJSON]]) -> any View)? = nil,
         trailingActionKeys: [String]? = nil,
-        trailingActionButton: (([String:[String:GenericJSON]]) -> any View)? = nil
+        trailingActionButton: (([String: [String: GenericJSON]]) -> any View)? = nil
     ) {
         self.titleKeys = titleKeys
         self.titleFormatter = titleFormatter
@@ -44,7 +56,7 @@ public struct CardRenderingListView {
 public struct CardRenderingDetailsView {
     /// An array of field render settings that will be used to generate a UI element with the defined keys
     var fields: [CardRenderingDetailsField]
-    
+
     public init(fields: [CardRenderingDetailsField]) {
         self.fields = fields
     }
@@ -56,15 +68,18 @@ public struct CardRenderingDetailsField {
     var id: String?
     /// An array of keys that will be used to generate an array of values extracted from the credentials
     var keys: [String]
-    /// [OPTIONAL] - Method used to create a custom field. Receives an array of values based on the array of keys for the same field
-    var formatter: (([String:[String:GenericJSON]]) -> any View)?
-    
-    public init(keys: [String], formatter: (([String:[String:GenericJSON]]) -> any View)?) {
+    /**
+    [OPTIONAL] - Method used to create a custom field. 
+    Receives an array of values based on the array of keys for the same field
+    */
+    var formatter: (([String: [String: GenericJSON]]) -> any View)?
+
+    public init(keys: [String], formatter: (([String: [String: GenericJSON]]) -> any View)?) {
         self.id = NSUUID().uuidString
         self.keys = keys
         self.formatter = formatter
     }
-    
+
     public init(keys: [String]) {
         self.id = NSUUID().uuidString
         self.keys = keys
@@ -85,7 +100,7 @@ public enum CardRendering {
 public struct Card: View {
     var credentialPack: CredentialPack
     var rendering: CardRendering
-    
+
     public init(
         credentialPack: CredentialPack,
         rendering: CardRendering
@@ -93,7 +108,7 @@ public struct Card: View {
         self.credentialPack = credentialPack
         self.rendering = rendering
     }
-    
+
     public var body: some View {
         switch rendering {
         case .list(let cardRenderingListView):
@@ -108,7 +123,7 @@ public struct Card: View {
 public struct CardListView: View {
     var credentialPack: CredentialPack
     var rendering: CardRenderingListView
-    
+
     public init(
         credentialPack: CredentialPack,
         rendering: CardRenderingListView
@@ -116,13 +131,13 @@ public struct CardListView: View {
         self.credentialPack = credentialPack
         self.rendering = rendering
     }
-    
+
     public var body: some View {
         let descriptionValues = credentialPack.get(keys: rendering.descriptionKeys ?? [])
         let titleValues = credentialPack.get(keys: rendering.titleKeys)
         HStack {
             // Leading icon
-            if(rendering.leadingIconFormatter != nil) {
+            if rendering.leadingIconFormatter != nil {
                 AnyView(
                     rendering.leadingIconFormatter!(
                         credentialPack.get(keys: rendering.leadingIconKeys ?? [])
@@ -131,25 +146,29 @@ public struct CardListView: View {
             }
             VStack(alignment: .leading) {
                 // Title
-                if(rendering.titleFormatter != nil) {
+                if rendering.titleFormatter != nil {
                     AnyView(rendering.titleFormatter!(titleValues))
                 } else if titleValues.count > 0 {
-                    let v = titleValues.values.reduce("",  { $0 + $1.values.map{$0.toString()}.joined(separator: " ")
+                    let value = titleValues.values
+                        .reduce("", { $0 + $1.values.map {$0.toString()}
+                        .joined(separator: " ")
                     })
-                    Text(v)
+                    Text(value)
                 }
                 // Description
-                if(rendering.descriptionFormatter != nil) {
+                if rendering.descriptionFormatter != nil {
                     AnyView(rendering.descriptionFormatter!(descriptionValues))
                 } else if descriptionValues.count > 0 {
-                    let v = descriptionValues.values.reduce("",  { $0 + $1.values.map{$0.toString()}.joined(separator: " ")
+                    let value = descriptionValues.values
+                        .reduce("", { $0 + $1.values.map {$0.toString()}
+                        .joined(separator: " ")
                     })
-                    Text(v)
+                    Text(value)
                 }
             }
             Spacer()
             // Trailing action button
-            if(rendering.trailingActionButton != nil) {
+            if rendering.trailingActionButton != nil {
                 AnyView(
                     rendering.trailingActionButton!(
                         credentialPack.get(keys: rendering.trailingActionKeys ?? [])
@@ -164,7 +183,7 @@ public struct CardListView: View {
 public struct CardDetailsView: View {
     var credentialPack: CredentialPack
     var rendering: CardRenderingDetailsView
-    
+
     public init(
         credentialPack: CredentialPack,
         rendering: CardRenderingDetailsView
@@ -180,8 +199,8 @@ public struct CardDetailsView: View {
                 if field.formatter != nil {
                     AnyView(field.formatter!(values))
                 } else {
-                    let v = values.values.reduce("",  { $0 + $1.values.map{$0.toString()}.joined(separator: " ")})
-                    Text(v)
+                    let value = values.values.reduce("", { $0 + $1.values.map {$0.toString()}.joined(separator: " ")})
+                    Text(value)
                 }
             }
         }

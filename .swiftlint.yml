@@ -3,3 +3,5 @@ excluded:
 disabled_rules:
   - cyclomatic_complexity
   - todo
+  - file_length
+  - force_try

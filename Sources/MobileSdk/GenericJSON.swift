@@ -4,7 +4,7 @@ import Foundation
 public enum GenericJSON {
     case string(String)
     case number(Double)
-    case object([String:GenericJSON])
+    case object([String: GenericJSON])
     case array([GenericJSON])
     case bool(Bool)
     case null
@@ -12,23 +12,23 @@ public enum GenericJSON {
 
 extension GenericJSON: Codable {
     public func encode(to encoder: Encoder) throws {
-        var c = encoder.singleValueContainer()
+        var container = encoder.singleValueContainer()
         switch self {
         case let .array(array):
-            try c.encode(array)
+            try container.encode(array)
         case let .object(object):
-            try c.encode(object)
+            try container.encode(object)
         case let .string(string):
-            try c.encode(string)
+            try container.encode(string)
         case let .number(number):
-            try c.encode(number)
+            try container.encode(number)
         case let .bool(bool):
-            try c.encode(bool)
+            try container.encode(bool)
         case .null:
-            try c.encodeNil()
+            try container.encodeNil()
         }
     }
-    
+
     public func toString() -> String {
         switch self {
         case .string(let str):
@@ -47,18 +47,18 @@ extension GenericJSON: Codable {
     }
 
     public init(from decoder: Decoder) throws {
-        let c = try decoder.singleValueContainer()
-        if let object = try? c.decode([String: GenericJSON].self) {
+        let container = try decoder.singleValueContainer()
+        if let object = try? container.decode([String: GenericJSON].self) {
             self = .object(object)
-        } else if let array = try? c.decode([GenericJSON].self) {
+        } else if let array = try? container.decode([GenericJSON].self) {
             self = .array(array)
-        } else if let string = try? c.decode(String.self) {
+        } else if let string = try? container.decode(String.self) {
             self = .string(string)
-        } else if let bool = try? c.decode(Bool.self) {
+        } else if let bool = try? container.decode(Bool.self) {
             self = .bool(bool)
-        } else if let number = try? c.decode(Double.self) {
+        } else if let number = try? container.decode(Double.self) {
             self = .number(number)
-        } else if c.decodeNil() {
+        } else if container.decodeNil() {
             self = .null
         } else {
             throw DecodingError.dataCorrupted(
@@ -113,7 +113,7 @@ public extension GenericJSON {
         }
         return nil
     }
-    
+
     subscript(dynamicMember member: String) -> GenericJSON? {
         return self[member]
     }
@@ -121,7 +121,7 @@ public extension GenericJSON {
     subscript(keyPath keyPath: String) -> GenericJSON? {
         return queryKeyPath(keyPath.components(separatedBy: "."))
     }
-    
+
     func queryKeyPath<T>(_ path: T) -> GenericJSON? where T: Collection, T.Element == String {
         guard case .object(let object) = self else {
             return nil
@@ -135,5 +135,5 @@ public extension GenericJSON {
         let tail = path.dropFirst()
         return tail.isEmpty ? value : value.queryKeyPath(tail)
     }
-    
+
 }

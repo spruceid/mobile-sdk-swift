@@ -1,13 +1,13 @@
 import Foundation
 
 enum W3CError: Error {
-    case InitializationError(String)
+    case initializationError(String)
 }
 
 public class W3CVC: Credential {
     private let credentialString: String
     private let credential: GenericJSON?
-    
+
     public init(credentialString: String) throws {
         self.credentialString = credentialString
         if let data = credentialString.data(using: .utf8) {
@@ -21,16 +21,16 @@ public class W3CVC: Credential {
         } else {
             self.credential = nil
             super.init(id: "")
-            throw W3CError.InitializationError("Failed to process credential string.")
+            throw W3CError.initializationError("Failed to process credential string.")
         }
     }
-    
-    override public func get(keys: [String]) -> [String:GenericJSON] {
-        if let c = credential!.dictValue {
-            return c.filter { keys.contains($0.key) }
+
+    override public func get(keys: [String]) -> [String: GenericJSON] {
+        if let cred = credential!.dictValue {
+            return cred.filter { keys.contains($0.key) }
         } else {
             return [:]
         }
-        
+
     }
 }

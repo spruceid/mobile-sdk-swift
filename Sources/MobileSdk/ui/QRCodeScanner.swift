@@ -43,13 +43,12 @@ public struct QRCodeScanner: View {
         self.readerColor = readerColor
         self.textColor = textColor
         self.backgroundOpacity = backgroundOpacity
-        
-        
+
     }
-    
+
     func calculateRegionOfInterest() -> CGSize {
         let size = UIScreen.screenSize
-                
+
         return CGSize(width: size.width * 0.6, height: size.width * 0.6)
     }
 

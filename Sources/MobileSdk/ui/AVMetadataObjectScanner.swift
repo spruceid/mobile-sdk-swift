@@ -2,7 +2,6 @@ import SwiftUI
 import AVKit
 import os.log
 
-
 public class AVMetadataObjectScannerDelegate: NSObject, ObservableObject, AVCaptureMetadataOutputObjectsDelegate {
 
     @Published public var scannedCode: String?
@@ -18,7 +17,6 @@ public class AVMetadataObjectScannerDelegate: NSObject, ObservableObject, AVCapt
         }
     }
 }
-
 
 public struct AVMetadataObjectScanner: View {
     /// QR Code Scanner properties
@@ -48,7 +46,6 @@ public struct AVMetadataObjectScanner: View {
     var backgroundOpacity: Double
     var regionOfInterest: CGSize
     var scannerGuides: (any View)?
-
 
     public init(
         metadataObjectTypes: [AVMetadataObject.ObjectType] = [.qr],

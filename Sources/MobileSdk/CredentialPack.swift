@@ -2,17 +2,17 @@ import Foundation
 import CryptoKit
 
 public class CredentialPack {
-    
+
     private var credentials: [Credential]
-    
+
     public init() {
         self.credentials = []
     }
-    
+
     public init(credentials: [Credential]) {
         self.credentials = credentials
     }
-    
+
     public func addW3CVC(credentialString: String) throws -> [Credential]? {
         do {
             let credential = try W3CVC(credentialString: credentialString)
@@ -22,7 +22,7 @@ public class CredentialPack {
             throw error
         }
     }
-    
+
     public func addMDoc(mdocBase64: String, keyPEM: String) throws -> [Credential]? {
         do {
             let mdocData = Data(base64Encoded: mdocBase64)!
@@ -47,20 +47,20 @@ public class CredentialPack {
             throw error
         }
     }
-    
-    public func get(keys: [String]) -> [String:[String:GenericJSON]] {
-        var values: [String:[String:GenericJSON]] = [:]
-        for c in self.credentials {
-            values[c.id] = c.get(keys: keys)
+
+    public func get(keys: [String]) -> [String: [String: GenericJSON]] {
+        var values: [String: [String: GenericJSON]] = [:]
+        for cred in self.credentials {
+            values[cred.id] = cred.get(keys: keys)
         }
-        
+
         return values
     }
-    
+
     public func get(credentialsIds: [String]) -> [Credential] {
         return self.credentials.filter { credentialsIds.contains($0.id) }
     }
-    
+
     public func get(credentialId: String) -> Credential? {
         if let credential = self.credentials.first(where: { $0.id == credentialId }) {
            return credential

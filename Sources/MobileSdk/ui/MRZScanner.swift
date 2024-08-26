@@ -18,7 +18,6 @@ public struct MRZScanner: View {
     var textColor: Color
     var backgroundOpacity: Double
 
-
     /// QR Code Scanner properties
     @State private var isScanning: Bool = false
     @State private var session: AVCaptureSession = .init()
@@ -72,7 +71,7 @@ public struct MRZScanner: View {
     }
 
     public var body: some View {
-        ZStack() {
+        ZStack {
             GeometryReader { dimension in
                 let viewSize = dimension.size
                 let size = UIScreen.screenSize
@@ -84,7 +83,10 @@ public struct MRZScanner: View {
                             .foregroundColor(Color.black.opacity(backgroundOpacity))
                             .frame(width: size.width, height: UIScreen.screenHeight)
                         Rectangle()
-                            .frame(width: size.width * regionOfInterest.height, height: size.height * regionOfInterest.width)
+                            .frame(
+                                width: size.width * regionOfInterest.height,
+                                height: size.height * regionOfInterest.width
+                            )
                             .position(CGPoint(x: viewSize.width/2, y: viewSize.height/2))
                             .blendMode(.destinationOut)
                         }
@@ -232,12 +234,13 @@ public struct MRZScanner: View {
             }
             session.addInput(input)
 
-
             /// Camera Output
             videoDataOutputDelegate.alwaysDiscardsLateVideoFrames = true
             videoDataOutputDelegate.setSampleBufferDelegate(videoOutputDelegate, queue: .main)
 
-            videoDataOutputDelegate.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange]
+            videoDataOutputDelegate.videoSettings = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+            ]
             videoDataOutputDelegate.connection(with: AVMediaType.video)?.preferredVideoStabilizationMode = .off
             /// Checking whether output can be added to the session
             guard session.canAddOutput(videoDataOutputDelegate) else {
@@ -277,7 +280,6 @@ public class MRZScannerDelegate: NSObject, ObservableObject, AVCaptureVideoDataO
     @Published public var scannedCode: String?
     var mrzFinder = MRZFinder()
 
-
     public func captureOutput(
             _ output: AVCaptureOutput,
             didOutput sampleBuffer: CMSampleBuffer,
@@ -293,7 +295,11 @@ public class MRZScannerDelegate: NSObject, ObservableObject, AVCaptureVideoDataO
             // makes recognition slower.
             request.usesLanguageCorrection = false
 
-            let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: CGImagePropertyOrientation.up, options: [:])
+            let requestHandler = VNImageRequestHandler(
+                cvPixelBuffer: pixelBuffer,
+                orientation: CGImagePropertyOrientation.up,
+                options: [:]
+            )
             do {
                 try requestHandler.perform([request])
             } catch {
@@ -315,7 +321,7 @@ public class MRZScannerDelegate: NSObject, ObservableObject, AVCaptureVideoDataO
             guard let candidate = visionResult.topCandidates(maximumCandidates).first else { continue }
 
             if let result = mrzFinder.checkMrz(str: candidate.string) {
-                if(result != "nil"){
+                if result != "nil"{
                     codes.append(result)
                 }
             }
@@ -331,14 +337,12 @@ public class MRZScannerDelegate: NSObject, ObservableObject, AVCaptureVideoDataO
     }
 }
 
-
 class MRZFinder {
     var frameIndex = 0
     var captureFirst = ""
     var captureSecond = ""
     var captureThird = ""
     var mrz = ""
-    var temp_mrz = ""
 
     typealias StringObservation = (lastSeen: Int, count: Int)
 
@@ -385,29 +389,30 @@ class MRZFinder {
         let firstLineRegex = "(IAUT)(0|O)\\d{10}(SRC)\\d{10}<<"
         let secondLineRegex = "[0-9O]{7}(M|F|<)[0-9O]{7}[A-Z0<]{3}[A-Z0-9<]{11}[0-9O]"
         let thirdLineRegex = "([A-Z0]+<)+<([A-Z0]+<)+<+"
+        // swiftlint:disable:next line_length
         let completeMrzRegex = "(IAUT)(0|O)\\d{10}(SRC)\\d{10}<<\n[0-9O]{7}(M|F|<)[0-9O]{7}[A-Z0<]{3}[A-Z0-9<]{11}[0-9O]\n([A-Z0]+<)+<([A-Z0]+<)+<+"
 
         let firstLine = str.range(of: firstLineRegex, options: .regularExpression, range: nil, locale: nil)
         let secondLine = str.range(of: secondLineRegex, options: .regularExpression, range: nil, locale: nil)
         let thirdLine = str.range(of: thirdLineRegex, options: .regularExpression, range: nil, locale: nil)
 
-        if(firstLine != nil){
-            if(str.count == 30){
+        if firstLine != nil {
+            if str.count == 30 {
                 captureFirst = str
             }
         }
-        if(secondLine != nil){
-            if(str.count == 30){
+        if secondLine != nil {
+            if str.count == 30 {
                 captureSecond = str
             }
         }
-        if(thirdLine != nil){
-            if(str.count == 30){
+        if thirdLine != nil {
+            if str.count == 30 {
                 captureThird = str
             }
         }
 
-        if(captureFirst.count == 30 && captureSecond.count == 30 && captureThird.count == 30){
+        if captureFirst.count == 30 && captureSecond.count == 30 && captureThird.count == 30 {
             let validChars = Set("ABCDEFGHIJKLKMNOPQRSTUVWXYZ1234567890<")
             temp_mrz = (
                 captureFirst.filter { validChars.contains($0) } + "\n" +
@@ -416,12 +421,12 @@ class MRZFinder {
             ).replacingOccurrences(of: " ", with: "<")
 
             let checkMrz = temp_mrz.range(of: completeMrzRegex, options: .regularExpression, range: nil, locale: nil)
-            if(checkMrz != nil){
+            if checkMrz != nil {
                 mrz = temp_mrz
             }
         }
 
-        if(mrz == ""){
+        if mrz == ""{
             return nil
         }
 

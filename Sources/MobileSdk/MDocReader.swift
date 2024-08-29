@@ -35,7 +35,7 @@ extension MDocReader: MDocReaderBLEDelegate {
             self.cancel()
         case .message(let data):
             do {
-                let responseData = try SpruceIDWalletSdkRs.handleResponse(state: self.sessionManager, response: data)
+                let responseData = try SpruceIDMobileSdkRs.handleResponse(state: self.sessionManager, response: data)
                 self.sessionManager = responseData.state
                 self.callback.update(state: .success(responseData.verifiedResponse))
             } catch {

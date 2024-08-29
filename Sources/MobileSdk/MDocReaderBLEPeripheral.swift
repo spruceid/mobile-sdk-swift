@@ -1,7 +1,7 @@
 import Algorithms
 import CoreBluetooth
 import Foundation
-import SpruceIDWalletSdkRs
+import SpruceIDMobileSdkRs
 
 class MDocReaderBLEPeripheral: NSObject {
     var peripheralManager: CBPeripheralManager!

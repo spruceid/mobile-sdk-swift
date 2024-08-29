@@ -18,5 +18,7 @@
 	<string>1</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Secure transmission of mobile DL data</string>
+	<key>NSCameraUsageDescription</key>
+	<string>QR Code Scanner</string>
 </dict>
 </plist>

@@ -1,5 +1,5 @@
 import CoreBluetooth
-import SpruceIDWalletSdkRs
+import SpruceIDMobileSdkRs
 
 public class MDocReader {
     var sessionManager: MdlSessionManager
@@ -9,7 +9,7 @@ public class MDocReader {
     public init?(callback: BLEReaderSessionStateDelegate, uri: String, requestedItems: [String: [String: Bool]]) {
         self.callback = callback
         do {
-            let sessionData = try SpruceIDWalletSdkRs.establishSession(uri: uri, requestedItems: requestedItems, trustAnchorRegistry: nil)
+            let sessionData = try SpruceIDMobileSdkRs.establishSession(uri: uri, requestedItems: requestedItems, trustAnchorRegistry: nil)
             self.sessionManager = sessionData.state
             self.bleManager = MDocReaderBLEPeripheral(callback: self, serviceUuid: CBUUID(string: sessionData.uuid), request: sessionData.request, bleIdent: Data(sessionData.bleIdent.utf8))
         } catch {

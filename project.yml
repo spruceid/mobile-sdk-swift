@@ -21,7 +21,7 @@ targets:
   MobileSdk:
     type: library.dynamic
     platform: iOS
-    deploymentTarget: "13.0"
+    deploymentTarget: "14.0"
     sources:
       - Sources
     dependencies:

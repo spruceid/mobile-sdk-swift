@@ -63,6 +63,7 @@ public class BLESessionManager {
     // Cancel the request mid-transaction and gracefully clean up the BLE stack.
     public func cancel() {
         bleManager.disconnectFromDevice()
+        self.callback.update(state: .canceled)
     }
 
     public func submitNamespaces(items: [String: [String: [String]]]) {
@@ -168,4 +169,6 @@ public enum BLESessionState {
     case uploadProgress(Int, Int)
     /// App should display a success message and offer to close the page
     case success
+    /// App should display a canceled message
+    case canceled
 }

@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = "SpruceIDMobileSdk"
-  spec.version      = "0.0.10"
+  spec.version      = "0.0.11"
   spec.summary      = "Swift Mobile SDK."
   spec.description  = <<-DESC
                    SpruceID Swift Mobile SDK.

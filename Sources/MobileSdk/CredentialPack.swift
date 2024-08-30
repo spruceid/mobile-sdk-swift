@@ -23,8 +23,25 @@ public class CredentialPack {
         }
     }
 
-    public func addMDoc(mdocBase64: String, keyAlias: String = UUID().uuidString) throws -> [Credential]? {
+    public func addMDoc(
+        mdocBase64: String,
+        keyPEM: String,
+        keyAlias: String = UUID().uuidString
+    ) throws -> [Credential]? {
         let mdocData = Data(base64Encoded: mdocBase64)!
+        let key = try P256.Signing.PrivateKey(pemRepresentation: keyPEM)
+        let attributes = [kSecAttrKeyType: kSecAttrKeyTypeECSECPrimeRandom,
+                         kSecAttrKeyClass: kSecAttrKeyClassPrivate] as [String: Any]
+        let secKey = SecKeyCreateWithData(key.x963Representation as CFData,
+                                          attributes as CFDictionary,
+                                          nil)!
+        let query = [kSecClass: kSecClassKey,
+      kSecAttrApplicationLabel: keyAlias,
+            kSecAttrAccessible: kSecAttrAccessibleWhenUnlocked,
+ kSecUseDataProtectionKeychain: true,
+                  kSecValueRef: secKey] as [String: Any]
+        SecItemDelete(query as CFDictionary)
+        _ = SecItemAdd(query as CFDictionary, nil)
         let credential = MDoc(fromMDoc: mdocData, namespaces: [:], keyAlias: keyAlias)!
         self.credentials.append(credential)
         return self.credentials

@@ -40,7 +40,7 @@ protocol MDocBLEDelegate: AnyObject {
 }
 
 enum MDocReaderBLECallback {
-    case done([String: [String: [String: MDocItem]]])
+    case done([String: [String: MDocItem]])
     case connected
     case error(MdocReaderBleError)
     case message(Data)

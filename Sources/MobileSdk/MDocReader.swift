@@ -6,12 +6,12 @@ public class MDocReader {
     var bleManager: MDocReaderBLEPeripheral!
     var callback: BLEReaderSessionStateDelegate
 
-    public init?(callback: BLEReaderSessionStateDelegate, uri: String, requestedItems: [String: [String: Bool]]) {
+    public init?(callback: BLEReaderSessionStateDelegate, uri: String, requestedItems: [String: [String: Bool]], trustAnchorRegistry: [String]?) {
         self.callback = callback
         do {
-            let sessionData = try SpruceIDMobileSdkRs.establishSession(uri: uri, requestedItems: requestedItems, trustAnchorRegistry: nil)
+            let sessionData = try SpruceIDMobileSdkRs.establishSession(uri: uri, requestedItems: requestedItems, trustAnchorRegistry: trustAnchorRegistry)
             self.sessionManager = sessionData.state
-            self.bleManager = MDocReaderBLEPeripheral(callback: self, serviceUuid: CBUUID(string: sessionData.uuid), request: sessionData.request, bleIdent: Data(sessionData.bleIdent.utf8))
+            self.bleManager = MDocReaderBLEPeripheral(callback: self, serviceUuid: CBUUID(string: sessionData.uuid), request: sessionData.request, bleIdent: sessionData.bleIdent)
         } catch {
             print("\(error)")
             return nil
@@ -65,7 +65,7 @@ public enum BLEReaderSessionState {
     ///   - 0: The number of chunks received to far
     case downloadProgress(Int)
     /// App should display a success message and offer to close the page
-    case success([String: [String: [String: MDocItem]]])
+    case success([String: [String: MDocItem]])
 }
 
 public enum BleReaderSessionError {

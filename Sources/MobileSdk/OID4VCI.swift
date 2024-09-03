@@ -2,7 +2,7 @@ import Foundation
 
 import SpruceIDMobileSdkRs
 
-public class Oid4vciSyncHttpClient : SpruceIDMobileSdkRs.HttpClient {
+public class Oid4vciSyncHttpClient : SyncHttpClient {
     public func httpClient(request: HttpRequest) throws -> HttpResponse {
         guard let url = URL(string: request.url) else {
             throw HttpClientError.Other(error: "failed to construct URL")
@@ -16,6 +16,7 @@ public class Oid4vciSyncHttpClient : SpruceIDMobileSdkRs.HttpClient {
         req.httpBody = request.body
         req.allHTTPHeaderFields = request.headers
         
+        // Semaphore used to wait for the callback to complete
         let semaphore = DispatchSemaphore(value: 0)
 
         var data: Data?
@@ -27,10 +28,14 @@ public class Oid4vciSyncHttpClient : SpruceIDMobileSdkRs.HttpClient {
             response = $1
             error = $2
 
+            // Signaling from inside the callback will let the outside function
+            // know that `data`, `response` and `error` are ready to be read.
             semaphore.signal()
         }
+        // Initiate execution of the http request
         dataTask.resume()
 
+        // Blocking wait for the callback to signal back
         _ = semaphore.wait(timeout: .distantFuture)
         
         if let error {
@@ -68,7 +73,7 @@ public class Oid4vciSyncHttpClient : SpruceIDMobileSdkRs.HttpClient {
     }
 }
 
-public class Oid4vciAsyncHttpClient : SpruceIDMobileSdkRs.AsyncHttpClient {
+public class Oid4vciAsyncHttpClient : AsyncHttpClient {
     public func httpClient(request: HttpRequest) async throws -> HttpResponse {
         guard let url = URL(string: request.url) else {
             throw HttpClientError.Other(error: "failed to construct URL")

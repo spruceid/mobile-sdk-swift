@@ -28,22 +28,17 @@ class MDocReaderBLEPeripheral: NSObject {
         self.requestData = request
         self.incomingMessageBuffer = Data()
         super.init()
-        self.peripheralManager = CBPeripheralManager(delegate: self, queue: nil, options: [CBPeripheralManagerOptionShowPowerAlertKey: true])
+        self.peripheralManager = CBPeripheralManager(delegate: self,
+                                                     queue: nil,
+                                                     options: [CBPeripheralManagerOptionShowPowerAlertKey: true])
     }
 
     func setupService() {
         let service = CBMutableService(type: self.serviceUuid, primary: true)
-        //         CBUUIDClientCharacteristicConfigurationString only returns "2902"
-        //        let clientDescriptor = CBMutableDescriptor(type: CBUUID(string: "00002902-0000-1000-8000-00805f9b34fb"), value: Data([0x00, 0x00])) as CBDescriptor
-        // wallet-sdk-kt isn't using write without response...
         self.stateCharacteristic = CBMutableCharacteristic(type: readerStateCharacteristicId,
                                                            properties: [.notify, .writeWithoutResponse, .write],
                                                            value: nil,
                                                            permissions: [.writeable])
-        // for some reason this seems to drop all other descriptors
-        //        self.stateCharacteristic!.descriptors = [clientDescriptor] + (self.stateCharacteristic!.descriptors ?? [] )
-        //        self.stateCharacteristic!.descriptors?.insert(clientDescriptor, at: 0)
-        // wallet-sdk-kt isn't using write without response...
         self.readCharacteristic = CBMutableCharacteristic(type: readerClient2ServerCharacteristicId,
                                                           properties: [.writeWithoutResponse, .write],
                                                           value: nil,
@@ -52,13 +47,10 @@ class MDocReaderBLEPeripheral: NSObject {
                                                            properties: [.notify],
                                                            value: nil,
                                                            permissions: [.readable, .writeable])
-        //        self.writeCharacteristic!.descriptors = [clientDescriptor] + (self.writeCharacteristic!.descriptors ?? [] )
-        //        self.writeCharacteristic!.descriptors?.insert(clientDescriptor, at: 0)
         self.identCharacteristic = CBMutableCharacteristic(type: readerIdentCharacteristicId,
                                                            properties: [.read],
                                                            value: bleIdent,
                                                            permissions: [.readable])
-        // wallet-sdk-kt is failing if this is present
         //        self.l2capCharacteristic = CBMutableCharacteristic(type: readerL2CAPCharacteristicId,
         //                                                           properties: [.read],
         //                                                           value: nil,
@@ -67,7 +59,7 @@ class MDocReaderBLEPeripheral: NSObject {
             stateCharacteristic! as CBCharacteristic,
             readCharacteristic! as CBCharacteristic,
             writeCharacteristic! as CBCharacteristic,
-            identCharacteristic! as CBCharacteristic,
+            identCharacteristic! as CBCharacteristic
             //            l2capCharacteristic! as CBCharacteristic
         ]
         peripheralManager.add(service)
@@ -180,7 +172,11 @@ extension MDocReaderBLEPeripheral: CBPeripheralManagerDelegate {
         self.drainWritingQueue()
     }
 
-    func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
+    func peripheralManager(
+        _ peripheral: CBPeripheralManager,
+        central: CBCentral,
+        didSubscribeTo characteristic: CBCharacteristic
+    ) {
         print("Subscribed to \(characteristic.uuid)")
         self.callback.callback(message: .connected)
         self.peripheralManager?.stopAdvertising()
@@ -194,20 +190,22 @@ extension MDocReaderBLEPeripheral: CBPeripheralManagerDelegate {
             return
         }
     }
-    
+
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
         print("Received read request for \(request.characteristic.uuid)")
-        
+
         // Since there is no callback for MTU on iOS we will grab it here.
         maximumCharacteristicSize = min(request.central.maximumUpdateValueLength, 512)
-        
-        if (request.characteristic.uuid == readerIdentCharacteristicId) {
+
+        if request.characteristic.uuid == readerIdentCharacteristicId {
             peripheralManager.respond(to: request, withResult: .success)
-        } else if (request.characteristic.uuid == readerL2CAPCharacteristicId) {
+        } else if request.characteristic.uuid == readerL2CAPCharacteristicId {
 //            peripheralManager.publishL2CAPChannel(withEncryption: true)
 //            peripheralManager.respond(to: request, withResult: .success)
         } else {
-            self.callback.callback(message: .error(.server("Read on unexpected characteristic with UUID \(request.characteristic.uuid)")))
+            self.callback.callback(message:
+                .error(.server("Read on unexpected characteristic with UUID \(request.characteristic.uuid)"))
+            )
         }
     }
 
@@ -215,7 +213,7 @@ extension MDocReaderBLEPeripheral: CBPeripheralManagerDelegate {
         for request in requests {
             // Since there is no callback for MTU on iOS we will grab it here.
             maximumCharacteristicSize = min(request.central.maximumUpdateValueLength, 512)
-            
+
             do {
                 print("Processing request")
                 try processData(central: request.central, characteristic: request.characteristic, value: request.value)
@@ -225,7 +223,9 @@ extension MDocReaderBLEPeripheral: CBPeripheralManagerDelegate {
                 }
             } catch {
                 self.callback.callback(message: .error(.server("\(error)")))
-                self.peripheralManager?.updateValue(Data([0x02]), for: self.stateCharacteristic!, onSubscribedCentrals: nil)
+                self.peripheralManager?.updateValue(Data([0x02]),
+                                                    for: self.stateCharacteristic!,
+                                                    onSubscribedCentrals: nil)
             }
         }
     }

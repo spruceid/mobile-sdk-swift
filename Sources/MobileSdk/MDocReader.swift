@@ -6,12 +6,22 @@ public class MDocReader {
     var bleManager: MDocReaderBLEPeripheral!
     var callback: BLEReaderSessionStateDelegate
 
-    public init?(callback: BLEReaderSessionStateDelegate, uri: String, requestedItems: [String: [String: Bool]], trustAnchorRegistry: [String]?) {
+    public init?(
+        callback: BLEReaderSessionStateDelegate,
+        uri: String,
+        requestedItems: [String: [String: Bool]],
+        trustAnchorRegistry: [String]?
+    ) {
         self.callback = callback
         do {
-            let sessionData = try SpruceIDMobileSdkRs.establishSession(uri: uri, requestedItems: requestedItems, trustAnchorRegistry: trustAnchorRegistry)
+            let sessionData = try SpruceIDMobileSdkRs.establishSession(uri: uri,
+                                                                       requestedItems: requestedItems,
+                                                                       trustAnchorRegistry: trustAnchorRegistry)
             self.sessionManager = sessionData.state
-            self.bleManager = MDocReaderBLEPeripheral(callback: self, serviceUuid: CBUUID(string: sessionData.uuid), request: sessionData.request, bleIdent: sessionData.bleIdent)
+            self.bleManager = MDocReaderBLEPeripheral(callback: self,
+                                                      serviceUuid: CBUUID(string: sessionData.uuid),
+                                                      request: sessionData.request,
+                                                      bleIdent: sessionData.bleIdent)
         } catch {
             print("\(error)")
             return nil

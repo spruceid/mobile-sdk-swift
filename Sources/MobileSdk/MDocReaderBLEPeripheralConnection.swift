@@ -3,7 +3,7 @@
 import CoreBluetooth
 import Foundation
 
-protocol MDocReaderBLEPeripheralConnectionDelegate {
+protocol MDocReaderBLEPeripheralConnectionDelegate: AnyObject {
     func streamOpen()
     func sentData(_ bytes: Int)
     func receivedData(_ data: Data)

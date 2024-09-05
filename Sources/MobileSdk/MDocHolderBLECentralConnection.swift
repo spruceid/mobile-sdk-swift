@@ -3,7 +3,7 @@
 import CoreBluetooth
 import Foundation
 
-public protocol MDocHolderBLECentralConnectionDelegate {
+public protocol MDocHolderBLECentralConnectionDelegate: AnyObject {
     func request(_ data: Data)
     func sendUpdate(bytes: Int, total: Int, fraction: Double)
     func sendComplete()

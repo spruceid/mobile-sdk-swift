@@ -221,16 +221,14 @@ class MDocReaderBLEPeripheral: NSObject {
                let readC = readCharacteristic,
                let writeC = writeCharacteristic,
                let identC = identCharacteristic,
-               let l2capC = l2capCharacteristic
-            {
+               let l2capC = l2capCharacteristic {
                 service.characteristics = (service.characteristics ?? []) + [stateC, readC, writeC, identC, l2capC]
             }
         } else {
             if let stateC = stateCharacteristic,
                let readC = readCharacteristic,
                let writeC = writeCharacteristic,
-               let identC = identCharacteristic
-            {
+               let identC = identCharacteristic {
                 service.characteristics = (service.characteristics ?? []) + [stateC, readC, writeC, identC]
             }
         }

@@ -6,12 +6,22 @@ public class MDocReader {
     var bleManager: MDocReaderBLEPeripheral!
     var callback: BLEReaderSessionStateDelegate
 
-    public init?(callback: BLEReaderSessionStateDelegate, uri: String, requestedItems: [String: [String: Bool]], trustAnchorRegistry: [String]?) {
+    public init?(
+        callback: BLEReaderSessionStateDelegate,
+        uri: String,
+        requestedItems: [String: [String: Bool]],
+        trustAnchorRegistry: [String]?
+    ) {
         self.callback = callback
         do {
-            let sessionData = try SpruceIDMobileSdkRs.establishSession(uri: uri, requestedItems: requestedItems, trustAnchorRegistry: trustAnchorRegistry)
-            sessionManager = sessionData.state
-            bleManager = MDocReaderBLEPeripheral(callback: self, serviceUuid: CBUUID(string: sessionData.uuid), request: sessionData.request, bleIdent: sessionData.bleIdent)
+            let sessionData = try SpruceIDMobileSdkRs.establishSession(uri: uri,
+                                                                       requestedItems: requestedItems,
+                                                                       trustAnchorRegistry: trustAnchorRegistry)
+            self.sessionManager = sessionData.state
+            self.bleManager = MDocReaderBLEPeripheral(callback: self,
+                                                      serviceUuid: CBUUID(string: sessionData.uuid),
+                                                      request: sessionData.request,
+                                                      bleIdent: sessionData.bleIdent)
         } catch {
             print("\(error)")
             return nil
@@ -26,24 +36,24 @@ public class MDocReader {
 extension MDocReader: MDocReaderBLEDelegate {
     func callback(message: MDocReaderBLECallback) {
         switch message {
-        case let .done(data):
-            callback.update(state: .success(data))
+        case .done(let data):
+            self.callback.update(state: .success(data))
         case .connected:
-            callback.update(state: .connected)
-        case let .error(error):
-            callback.update(state: .error(BleReaderSessionError(readerBleError: error)))
-            cancel()
-        case let .message(data):
+            self.callback.update(state: .connected)
+        case .error(let error):
+            self.callback.update(state: .error(BleReaderSessionError(readerBleError: error)))
+            self.cancel()
+        case .message(let data):
             do {
-                let responseData = try SpruceIDMobileSdkRs.handleResponse(state: sessionManager, response: data)
-                sessionManager = responseData.state
-                callback.update(state: .success(responseData.verifiedResponse))
+                let responseData = try SpruceIDMobileSdkRs.handleResponse(state: self.sessionManager, response: data)
+                self.sessionManager = responseData.state
+                self.callback.update(state: .success(responseData.verifiedResponse))
             } catch {
-                callback.update(state: .error(.generic("\(error)")))
-                cancel()
+                self.callback.update(state: .error(.generic("\(error)")))
+                self.cancel()
             }
-        case let .downloadProgress(index):
-            callback.update(state: .downloadProgress(index))
+        case .downloadProgress(let index):
+            self.callback.update(state: .downloadProgress(index))
         }
     }
 }
@@ -78,9 +88,10 @@ public enum BleReaderSessionError {
 
     init(readerBleError: MdocReaderBleError) {
         switch readerBleError {
-        case let .server(string):
+
+        case .server(let string):
             self = .server(string)
-        case let .bluetooth(string):
+        case .bluetooth(let string):
             self = .bluetooth(string)
         }
     }

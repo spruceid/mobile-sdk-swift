@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "mobile-sdk-rs",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/spruceid/mobile-sdk-rs.git",
+      "state" : {
+        "revision" : "e8a1b7056989e4cb471281b464c1aeac298be97f",
+        "version" : "0.0.29"
+      }
+    },
+    {
       "identity" : "swift-algorithms",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-algorithms",

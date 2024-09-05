@@ -36,24 +36,24 @@ public class KeyManager: NSObject {
      * Returns a secret key - based on the id of the key.
      */
     public static func getSecretKey(id: String) -> SecKey? {
-        let tag = id.data(using: .utf8)!
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassKey,
-            kSecAttrApplicationTag as String: tag,
-            kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
-            kSecReturnRef as String: true
-        ]
+      let tag = id.data(using: .utf8)!
+      let query: [String: Any] = [
+          kSecClass as String: kSecClassKey,
+          kSecAttrApplicationTag as String: tag,
+          kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
+          kSecReturnRef as String: true
+      ]
 
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
+      var item: CFTypeRef?
+      let status = SecItemCopyMatching(query as CFDictionary, &item)
 
-        guard status == errSecSuccess else { return nil }
+      guard status == errSecSuccess else { return nil }
 
-        // swiftlint:disable force_cast
-        let key = item as! SecKey
-        // swiftlint:enable force_cast
+      // swiftlint:disable force_cast
+      let key = item as! SecKey
+      // swiftlint:enable force_cast
 
-        return key
+      return key
     }
 
     /**
@@ -66,8 +66,7 @@ public class KeyManager: NSObject {
             kCFAllocatorDefault,
             kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
             .privateKeyUsage,
-            nil
-        )!
+            nil)!
 
         let attributes: [String: Any] = [
             kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
@@ -83,7 +82,7 @@ public class KeyManager: NSObject {
 
         var error: Unmanaged<CFError>?
         SecKeyCreateRandomKey(attributes as CFDictionary, &error)
-        if error != nil { print(error!) }
+      if error != nil { print(error!) }
         return error == nil
     }
 
@@ -91,35 +90,35 @@ public class KeyManager: NSObject {
      * Returns a JWK for a particular secret key by key id.
      */
     public static func getJwk(id: String) -> String? {
-        guard let key = getSecretKey(id: id) else { return nil }
+      guard let key = getSecretKey(id: id) else { return nil }
 
-        guard let publicKey = SecKeyCopyPublicKey(key) else {
-            return nil
-        }
+      guard let publicKey = SecKeyCopyPublicKey(key) else {
+          return nil
+      }
 
-        var error: Unmanaged<CFError>?
-        guard let data = SecKeyCopyExternalRepresentation(publicKey, &error) as? Data else {
-            return nil
-        }
+      var error: Unmanaged<CFError>?
+      guard let data = SecKeyCopyExternalRepresentation(publicKey, &error) as? Data else {
+         return nil
+      }
 
-        let fullData: Data = data.subdata(in: 1 ..< data.count)
-        let xDataRaw: Data = fullData.subdata(in: 0 ..< 32)
-        let yDataRaw: Data = fullData.subdata(in: 32 ..< 64)
+      let fullData: Data = data.subdata(in: 1..<data.count)
+      let xDataRaw: Data = fullData.subdata(in: 0..<32)
+      let yDataRaw: Data = fullData.subdata(in: 32..<64)
 
-        let xCoordinate = xDataRaw.base64EncodedUrlSafe
-        let yCoordinate = yDataRaw.base64EncodedUrlSafe
+      let xCoordinate = xDataRaw.base64EncodedUrlSafe
+      let yCoordinate = yDataRaw.base64EncodedUrlSafe
 
-        let jsonObject: [String: Any] = [
-            "kty": "EC",
-            "crv": "P-256",
-            "x": xCoordinate,
-            "y": yCoordinate
-        ]
+      let jsonObject: [String: Any]  = [
+         "kty": "EC",
+         "crv": "P-256",
+         "x": xCoordinate,
+         "y": yCoordinate
+      ]
 
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else { return nil }
-        let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
+      guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else { return nil }
+      let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
 
-        return jsonString
+      return jsonString
     }
 
     /**
@@ -140,7 +139,7 @@ public class KeyManager: NSObject {
             data,
             &error
         ) as Data? else {
-            print(error ?? "no error")
+          print(error ?? "no error")
             return nil
         }
 
@@ -157,8 +156,7 @@ public class KeyManager: NSObject {
             kCFAllocatorDefault,
             kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
             .privateKeyUsage,
-            nil
-        )!
+            nil)!
 
         let attributes: [String: Any] = [
             kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,

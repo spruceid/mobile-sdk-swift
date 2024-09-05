@@ -34,7 +34,9 @@ class BLEInternalConnection: NSObject, StreamDelegate {
 
         case Stream.Event.hasBytesAvailable:
             streamBytesAvailable()
-            readBytes(from: aStream as! InputStream)
+            if let stream = aStream as? InputStream {
+                readBytes(from: stream)
+            }
 
         case Stream.Event.hasSpaceAvailable:
             streamSpaceAvailable()
@@ -78,13 +80,13 @@ class BLEInternalConnection: NSObject, StreamDelegate {
 
     /// Close the stream.
     public func close() {
-        if let ch = channel {
-            ch.outputStream.close()
-            ch.inputStream.close()
-            ch.inputStream.remove(from: .main, forMode: .default)
-            ch.outputStream.remove(from: .main, forMode: .default)
-            ch.inputStream.delegate = nil
-            ch.outputStream.delegate = nil
+        if let chn = channel {
+            chn.outputStream.close()
+            chn.inputStream.close()
+            chn.inputStream.remove(from: .main, forMode: .default)
+            chn.outputStream.remove(from: .main, forMode: .default)
+            chn.inputStream.delegate = nil
+            chn.outputStream.delegate = nil
             openCount = 0
         }
 

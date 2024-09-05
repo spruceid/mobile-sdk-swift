@@ -46,7 +46,7 @@ class MDocHolderBLECentral: NSObject {
     var incomingMessageBuffer = Data()
     var outgoingMessageBuffer = Data()
 
-    private var channelPSM: UInt16? = nil
+    private var channelPSM: UInt16?
     private var activeStream: MDocHolderBLECentralConnection?
 
     /// If this is `false`, we decline to connect to L2CAP even if it is offered.
@@ -113,8 +113,7 @@ class MDocHolderBLECentral: NSObject {
                             peri.readValue(for: l2capC)
                             machineState = .l2capAwaitRequest
                         } else if let readC = readCharacteristic,
-                                  let stateC = stateCharacteristic
-                        {
+                                  let stateC = stateCharacteristic {
                             peri.setNotifyValue(true, for: readC)
                             peri.setNotifyValue(true, for: stateC)
                             peri.writeValue(_: Data([0x01]), for: stateC, type: .withoutResponse)
@@ -250,18 +249,18 @@ class MDocHolderBLECentral: NSObject {
     }
 
     /// Verify that a characteristic matches what is required of it.
-    private func getCharacteristic(list: [CBCharacteristic], uuid: CBUUID, properties: [CBCharacteristicProperties], required: Bool) throws -> CBCharacteristic? {
+    private func getCharacteristic(list: [CBCharacteristic],
+                                   uuid: CBUUID, properties: [CBCharacteristicProperties],
+                                   required: Bool) throws -> CBCharacteristic? {
         let chName = MDocCharacteristicNameFromUUID(uuid)
 
         if let candidate = list.first(where: { $0.uuid == uuid }) {
-            for prop in properties {
-                if !candidate.properties.contains(prop) {
-                    let propName = MDocCharacteristicPropertyName(prop)
-                    if required {
-                        throw CharacteristicsError.missingMandatoryProperty(name: propName, characteristicName: chName)
-                    } else {
-                        return nil
-                    }
+            for prop in properties where !candidate.properties.contains(prop) {
+                let propName = MDocCharacteristicPropertyName(prop)
+                if required {
+                    throw CharacteristicsError.missingMandatoryProperty(name: propName, characteristicName: chName)
+                } else {
+                    return nil
                 }
             }
             return candidate
@@ -294,8 +293,7 @@ class MDocHolderBLECentral: NSObject {
         if let readerIdent = try getCharacteristic(list: characteristics,
                                                    uuid: readerIdentCharacteristicId,
                                                    properties: [.read],
-                                                   required: true)
-        {
+                                                   required: true) {
             peripheral.readValue(for: readerIdent)
         }
 
@@ -316,7 +314,8 @@ class MDocHolderBLECentral: NSObject {
     /// the L2CAP stream...), so we hit this call multiple times from several angles, at least in the original flow.
     func processData(peripheral: CBPeripheral, characteristic: CBCharacteristic) throws {
         if var data = characteristic.value {
-            print("Processing \(data.count) bytes for \(MDocCharacteristicNameFromUUID(characteristic.uuid)) → ", terminator: "")
+            print("Processing \(data.count) bytes for \(MDocCharacteristicNameFromUUID(characteristic.uuid)) → ",
+                  terminator: "")
             switch characteristic.uuid {
             /// Transfer indicator.
             case readerStateCharacteristicId:
@@ -394,8 +393,7 @@ extension MDocHolderBLECentral: CBCentralManagerDelegate {
     func centralManager(_: CBCentralManager,
                         didDiscover peripheral: CBPeripheral,
                         advertisementData _: [String: Any],
-                        rssi _: NSNumber)
-    {
+                        rssi _: NSNumber) {
         print("Discovered peripheral")
         peripheral.delegate = self
         self.peripheral = peripheral

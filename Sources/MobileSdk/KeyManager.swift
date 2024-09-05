@@ -8,7 +8,7 @@ public class KeyManager: NSObject {
      */
     public static func reset() -> Bool {
         let query: [String: Any] = [
-            kSecClass as String: kSecClassKey,
+            kSecClass as String: kSecClassKey
         ]
 
         let ret = SecItemDelete(query as CFDictionary)
@@ -24,7 +24,7 @@ public class KeyManager: NSObject {
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: tag,
             kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
-            kSecReturnRef as String: true,
+            kSecReturnRef as String: true
         ]
 
         var item: CFTypeRef?
@@ -41,7 +41,7 @@ public class KeyManager: NSObject {
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: tag,
             kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
-            kSecReturnRef as String: true,
+            kSecReturnRef as String: true
         ]
 
         var item: CFTypeRef?
@@ -77,8 +77,8 @@ public class KeyManager: NSObject {
             kSecPrivateKeyAttrs as String: [
                 kSecAttrIsPermanent as String: true,
                 kSecAttrApplicationTag as String: tag,
-                kSecAttrAccessControl as String: access,
-            ],
+                kSecAttrAccessControl as String: access
+            ]
         ]
 
         var error: Unmanaged<CFError>?
@@ -113,7 +113,7 @@ public class KeyManager: NSObject {
             "kty": "EC",
             "crv": "P-256",
             "x": xCoordinate,
-            "y": yCoordinate,
+            "y": yCoordinate
         ]
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else { return nil }
@@ -168,8 +168,8 @@ public class KeyManager: NSObject {
             kSecPrivateKeyAttrs as String: [
                 kSecAttrIsPermanent as String: true,
                 kSecAttrApplicationTag as String: tag,
-                kSecAttrAccessControl as String: access,
-            ],
+                kSecAttrAccessControl as String: access
+            ]
         ]
 
         var error: Unmanaged<CFError>?

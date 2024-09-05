@@ -3,17 +3,17 @@
 import CoreBluetooth
 import Foundation
 
-protocol MDocReaderBLEPeripheralConnectionDelegate: AnyObject {
+protocol MDocReaderBLEPeriConnDelegate: AnyObject {
     func streamOpen()
     func sentData(_ bytes: Int)
     func receivedData(_ data: Data)
 }
 
 class MDocReaderBLEPeripheralConnection: BLEInternalConnection {
-    private let controlDelegate: MDocReaderBLEPeripheralConnectionDelegate
+    private let controlDelegate: MDocReaderBLEPeriConnDelegate
 
     /// Initialize a reader peripheral connection.
-    init(delegate: MDocReaderBLEPeripheralConnectionDelegate, channel: CBL2CAPChannel) {
+    init(delegate: MDocReaderBLEPeriConnDelegate, channel: CBL2CAPChannel) {
         controlDelegate = delegate
         super.init()
         self.channel = channel

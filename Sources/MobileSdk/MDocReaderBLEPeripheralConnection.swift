@@ -9,7 +9,7 @@ protocol MDocReaderBLEPeriConnDelegate: AnyObject {
     func receivedData(_ data: Data)
 }
 
-class MDocReaderBLEPeripheralConnection: BLEInternalConnection {
+class MDocReaderBLEPeripheralConnection: BLEInternalL2CAPConnection {
     private let controlDelegate: MDocReaderBLEPeriConnDelegate
 
     /// Initialize a reader peripheral connection.

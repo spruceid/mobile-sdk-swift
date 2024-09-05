@@ -10,7 +10,7 @@ public protocol MDocHolderBLECentralConnectionDelegate: AnyObject {
     func connectionEnd()
 }
 
-class MDocHolderBLECentralConnection: BLEInternalConnection {
+class MDocHolderBLECentralConnection: BLEInternalL2CAPConnection {
     private let controlDelegate: MDocHolderBLECentralConnectionDelegate
 
     /// Initialize a reader peripheral connection.

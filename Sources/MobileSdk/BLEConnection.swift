@@ -4,7 +4,7 @@ import CoreBluetooth
 import Foundation
 
 /// The base BLE connection, only intended for subclassing.
-class BLEInternalConnection: NSObject, StreamDelegate {
+class BLEInternalL2CAPConnection: NSObject, StreamDelegate {
     var channel: CBL2CAPChannel?
 
     private var outputData = Data()

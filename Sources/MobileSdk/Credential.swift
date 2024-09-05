@@ -9,7 +9,7 @@ open class Credential: Identifiable {
 
     open func get(keys: [String]) -> [String: GenericJSON] {
         if keys.contains("id") {
-            return ["id": GenericJSON.string(self.id)]
+            return ["id": GenericJSON.string(id)]
         } else {
             return [:]
         }

@@ -31,11 +31,11 @@ extension GenericJSON: Codable {
 
     public func toString() -> String {
         switch self {
-        case .string(let str):
+        case let .string(str):
             return str
-        case .number(let num):
+        case let .number(num):
             return num.debugDescription
-        case .bool(let bool):
+        case let .bool(bool):
             return bool.description
         case .null:
             return "null"
@@ -71,11 +71,11 @@ extension GenericJSON: Codable {
 extension GenericJSON: CustomDebugStringConvertible {
     public var debugDescription: String {
         switch self {
-        case .string(let str):
+        case let .string(str):
             return str.debugDescription
-        case .number(let num):
+        case let .number(num):
             return num.debugDescription
-        case .bool(let bool):
+        case let .bool(bool):
             return bool.description
         case .null:
             return "null"
@@ -89,26 +89,28 @@ extension GenericJSON: CustomDebugStringConvertible {
 
 public extension GenericJSON {
     var dictValue: [String: GenericJSON]? {
-        if case .object(let value) = self {
+        if case let .object(value) = self {
             return value
         }
         return nil
     }
+
     var arrayValue: [GenericJSON]? {
-        if case .array(let value) = self {
+        if case let .array(value) = self {
             return value
         }
         return nil
     }
+
     subscript(index: Int) -> GenericJSON? {
-        if case .array(let arr) = self, arr.indices.contains(index) {
+        if case let .array(arr) = self, arr.indices.contains(index) {
             return arr[index]
         }
         return nil
     }
 
     subscript(key: String) -> GenericJSON? {
-        if case .object(let dict) = self {
+        if case let .object(dict) = self {
             return dict[key]
         }
         return nil
@@ -123,7 +125,7 @@ public extension GenericJSON {
     }
 
     func queryKeyPath<T>(_ path: T) -> GenericJSON? where T: Collection, T.Element == String {
-        guard case .object(let object) = self else {
+        guard case let .object(object) = self else {
             return nil
         }
         guard let head = path.first else {
@@ -135,5 +137,4 @@ public extension GenericJSON {
         let tail = path.dropFirst()
         return tail.isEmpty ? value : value.queryKeyPath(tail)
     }
-
 }

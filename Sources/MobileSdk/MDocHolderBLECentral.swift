@@ -36,7 +36,7 @@ class MDocHolderBLECentral: NSObject {
     var writeCharacteristic: CBCharacteristic?
     var readCharacteristic: CBCharacteristic?
     var stateCharacteristic: CBCharacteristic?
-    var l2capCharacteristic:  CBCharacteristic?
+    var l2capCharacteristic: CBCharacteristic?
 
     var maximumCharacteristicSize: Int?
     var writingQueueTotalChunks = 0
@@ -63,7 +63,7 @@ class MDocHolderBLECentral: NSObject {
         self.serviceUuid = serviceUuid
         self.callback = callback
         super.init()
-        self.centralManager = CBCentralManager(delegate: self, queue: nil)
+        centralManager = CBCentralManager(delegate: self, queue: nil)
     }
 
     /// Update the state machine.
@@ -80,19 +80,17 @@ class MDocHolderBLECentral: NSObject {
             update = false
 
             switch machineState {
-
-                /// Core.
+            /// Core.
             case .initial: // Object just initialized, hardware not ready.
                 if machinePendingState == .hardwareOn {
                     machineState = machinePendingState
                     update = true
                 }
-                
+
             case .hardwareOn: // Hardware is ready.
                 centralManager.scanForPeripherals(withServices: [serviceUuid])
                 machineState = machinePendingState
                 machinePendingState = .awaitPeripheralDiscovery
-                break
 
             case .awaitPeripheralDiscovery:
                 if machinePendingState == .peripheralDiscovered {
@@ -104,19 +102,19 @@ class MDocHolderBLECentral: NSObject {
                     machineState = machinePendingState
 
                     centralManager?.stopScan()
-                    self.callback.callback(message: .connected)
+                    callback.callback(message: .connected)
                 }
 
             case .checkPeripheral:
                 if machinePendingState == .awaitRequest {
-
                     if let peri = peripheral {
                         if useL2CAP, let l2capC = l2capCharacteristic {
                             peri.setNotifyValue(true, for: l2capC)
                             peri.readValue(for: l2capC)
                             machineState = .l2capAwaitRequest
                         } else if let readC = readCharacteristic,
-                                  let stateC = stateCharacteristic {
+                                  let stateC = stateCharacteristic
+                        {
                             peri.setNotifyValue(true, for: readC)
                             peri.setNotifyValue(true, for: stateC)
                             peri.writeValue(_: Data([0x01]), for: stateC, type: .withoutResponse)
@@ -125,7 +123,7 @@ class MDocHolderBLECentral: NSObject {
                     }
                 }
 
-                /// Original flow.
+            /// Original flow.
             case .awaitRequest:
                 if machinePendingState == .requestReceived {
                     machineState = machinePendingState
@@ -133,8 +131,8 @@ class MDocHolderBLECentral: NSObject {
                     incomingMessageBuffer = Data()
                 }
 
-                /// The request has been received, we're waiting for the user to respond to the selective diclosure
-                /// dialog.
+            /// The request has been received, we're waiting for the user to respond to the selective diclosure
+            /// dialog.
             case .requestReceived:
                 if machinePendingState == .sendingResponse {
                     machineState = machinePendingState
@@ -151,7 +149,7 @@ class MDocHolderBLECentral: NSObject {
                     machineState = machinePendingState
                 }
 
-                /// L2CAP flow.
+            /// L2CAP flow.
             case .l2capAwaitRequest:
                 if machinePendingState == .l2capRequestReceived {
                     machineState = machinePendingState
@@ -159,8 +157,8 @@ class MDocHolderBLECentral: NSObject {
                     incomingMessageBuffer = Data()
                 }
 
-                /// The request has been received, we're waiting for the user to respond to the selective diclosure
-                /// dialog.
+            /// The request has been received, we're waiting for the user to respond to the selective diclosure
+            /// dialog.
             case .l2capRequestReceived:
                 if machinePendingState == .l2capSendingResponse {
                     machineState = machinePendingState
@@ -174,12 +172,12 @@ class MDocHolderBLECentral: NSObject {
                     machineState = machinePendingState
                 }
 
-                //    
+                //
 
             case .fatalError: // Something went wrong.
                 machineState = .halted
                 machinePendingState = .halted
-                
+
             case .complete: // Transfer complete.
                 break
 
@@ -188,8 +186,8 @@ class MDocHolderBLECentral: NSObject {
             }
         }
     }
-    
-    func disconnectFromDevice () {
+
+    func disconnectFromDevice() {
         let message: Data
         do {
             message = try terminateSession()
@@ -204,7 +202,7 @@ class MDocHolderBLECentral: NSObject {
     }
 
     private func disconnect() {
-        if let peripheral = self.peripheral {
+        if let peripheral = peripheral {
             centralManager.cancelPeripheralConnection(peripheral)
         }
     }
@@ -236,7 +234,7 @@ class MDocHolderBLECentral: NSObject {
                 chunk.reverse()
                 chunk.append(firstByte)
                 chunk.reverse()
-                self.callback.callback(message: .uploadProgress(writingQueueChunkIndex, writingQueueTotalChunks))
+                callback.callback(message: .uploadProgress(writingQueueChunkIndex, writingQueueTotalChunks))
                 peripheral?.writeValue(_: chunk,
                                        for: writeCharacteristic!,
                                        type: CBCharacteristicWriteType.withoutResponse)
@@ -244,7 +242,7 @@ class MDocHolderBLECentral: NSObject {
                     machinePendingState = .complete
                 }
             } else {
-                self.callback.callback(message: .uploadProgress(writingQueueTotalChunks, writingQueueTotalChunks))
+                callback.callback(message: .uploadProgress(writingQueueTotalChunks, writingQueueTotalChunks))
                 writingQueue = nil
                 machinePendingState = .complete
             }
@@ -255,7 +253,7 @@ class MDocHolderBLECentral: NSObject {
     private func getCharacteristic(list: [CBCharacteristic], uuid: CBUUID, properties: [CBCharacteristicProperties], required: Bool) throws -> CBCharacteristic? {
         let chName = MDocCharacteristicNameFromUUID(uuid)
 
-        if let candidate = list.first(where: {$0.uuid == uuid}) {
+        if let candidate = list.first(where: { $0.uuid == uuid }) {
             for prop in properties {
                 if !candidate.properties.contains(prop) {
                     let propName = MDocCharacteristicPropertyName(prop)
@@ -278,7 +276,6 @@ class MDocHolderBLECentral: NSObject {
 
     /// Check that the reqiured characteristics are available with the required properties.
     func processCharacteristics(peripheral: CBPeripheral, characteristics: [CBCharacteristic]) throws {
-
         stateCharacteristic = try getCharacteristic(list: characteristics,
                                                     uuid: readerStateCharacteristicId,
                                                     properties: [.notify, .writeWithoutResponse],
@@ -288,7 +285,7 @@ class MDocHolderBLECentral: NSObject {
                                                     uuid: readerClient2ServerCharacteristicId,
                                                     properties: [.writeWithoutResponse],
                                                     required: true)
-        
+
         readCharacteristic = try getCharacteristic(list: characteristics,
                                                    uuid: readerServer2ClientCharacteristicId,
                                                    properties: [.notify],
@@ -297,10 +294,11 @@ class MDocHolderBLECentral: NSObject {
         if let readerIdent = try getCharacteristic(list: characteristics,
                                                    uuid: readerIdentCharacteristicId,
                                                    properties: [.read],
-                                                   required: true) {
+                                                   required: true)
+        {
             peripheral.readValue(for: readerIdent)
         }
-        
+
         l2capCharacteristic = try getCharacteristic(list: characteristics,
                                                     uuid: readerL2CAPCharacteristicId,
                                                     properties: [.read],
@@ -308,11 +306,10 @@ class MDocHolderBLECentral: NSObject {
 
 //       iOS controls MTU negotiation. Since MTU is just a maximum, we can use a lower value than the negotiated value.
 //       18013-5 expects an upper limit of 515 MTU, so we cap at this even if iOS negotiates a higher value.
-//       
+//
 //       maximumWriteValueLength() returns the maximum characteristic size, which is 3 less than the MTU.
-       let negotiatedMaximumCharacteristicSize = peripheral.maximumWriteValueLength(for: .withoutResponse)
-       maximumCharacteristicSize = min(negotiatedMaximumCharacteristicSize - 3, 512)
-
+        let negotiatedMaximumCharacteristicSize = peripheral.maximumWriteValueLength(for: .withoutResponse)
+        maximumCharacteristicSize = min(negotiatedMaximumCharacteristicSize - 3, 512)
     }
 
     /// Process incoming data from a peripheral. This handles incoming data from any and all characteristics (though not
@@ -321,21 +318,20 @@ class MDocHolderBLECentral: NSObject {
         if var data = characteristic.value {
             print("Processing \(data.count) bytes for \(MDocCharacteristicNameFromUUID(characteristic.uuid)) → ", terminator: "")
             switch characteristic.uuid {
-
-                /// Transfer indicator.
+            /// Transfer indicator.
             case readerStateCharacteristicId:
                 if data.count != 1 {
                     throw DataError.invalidStateLength
                 }
                 switch data[0] {
                 case 0x02:
-                    self.callback.callback(message: .done)
-                    self.disconnect()
+                    callback.callback(message: .done)
+                    disconnect()
                 case let byte:
                     throw DataError.unknownState(byte: byte)
                 }
 
-                /// Incoming request.
+            /// Incoming request.
             case readerServer2ClientCharacteristicId:
                 let firstByte = data.popFirst()
                 incomingMessageBuffer.append(data)
@@ -349,13 +345,13 @@ class MDocHolderBLECentral: NSObject {
 
                 case 0x01: // partial
                     print("Chunk")
-                    // TODO check length against MTU
+                    // TODO: check length against MTU
 
                 case let .some(byte):
                     throw DataError.unknownDataTransferPrefix(byte: byte)
                 }
 
-                /// Ident check.
+            /// Ident check.
             case readerIdentCharacteristicId:
                 // Looks like this should just happen after discovering characteristics
                 print("Ident")
@@ -363,7 +359,7 @@ class MDocHolderBLECentral: NSObject {
                 // to the callback to see if the caller likes it.
                 machinePendingState = .awaitRequest
 
-                /// L2CAP channel ID.
+            /// L2CAP channel ID.
             case readerL2CAPCharacteristicId:
                 print("PSM: ", terminator: "")
                 if data.count == 2 {
@@ -385,21 +381,21 @@ class MDocHolderBLECentral: NSObject {
 }
 
 extension MDocHolderBLECentral: CBCentralManagerDelegate {
-
     /// Handle a state change in the central manager.
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
             machinePendingState = .hardwareOn
         } else {
-            self.callback.callback(message: .error(.bluetooth(central)))
+            callback.callback(message: .error(.bluetooth(central)))
         }
     }
 
     /// Handle discovering a peripheral.
-    func centralManager(_ central: CBCentralManager,
+    func centralManager(_: CBCentralManager,
                         didDiscover peripheral: CBPeripheral,
-                        advertisementData: [String: Any],
-                        rssi RSSI: NSNumber) {
+                        advertisementData _: [String: Any],
+                        rssi _: NSNumber)
+    {
         print("Discovered peripheral")
         peripheral.delegate = self
         self.peripheral = peripheral
@@ -408,18 +404,17 @@ extension MDocHolderBLECentral: CBCentralManagerDelegate {
     }
 
     /// Handle connecting to a peripheral.
-    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        peripheral.discoverServices([self.serviceUuid])
+    func centralManager(_: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        peripheral.discoverServices([serviceUuid])
         machinePendingState = .checkPeripheral
     }
 }
 
 extension MDocHolderBLECentral: CBPeripheralDelegate {
-
     /// Handle discovery of peripheral services.
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        if (error) != nil {
-            self.callback.callback(
+        if error != nil {
+            callback.callback(
                 message: .error(.peripheral("Error discovering services: \(error!.localizedDescription)"))
             )
             return
@@ -434,8 +429,8 @@ extension MDocHolderBLECentral: CBPeripheralDelegate {
 
     /// Handle discovery of characteristics for a peripheral service.
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        if (error) != nil {
-            self.callback.callback(
+        if error != nil {
+            callback.callback(
                 message: .error(.peripheral("Error discovering characteristics: \(error!.localizedDescription)"))
             )
             return
@@ -443,9 +438,9 @@ extension MDocHolderBLECentral: CBPeripheralDelegate {
         if let characteristics = service.characteristics {
             print("Discovered characteristics")
             do {
-                try self.processCharacteristics(peripheral: peripheral, characteristics: characteristics)
+                try processCharacteristics(peripheral: peripheral, characteristics: characteristics)
             } catch {
-                self.callback.callback(message: .error(.peripheral("\(error)")))
+                callback.callback(message: .error(.peripheral("\(error)")))
                 centralManager?.cancelPeripheralConnection(peripheral)
             }
         }
@@ -454,9 +449,9 @@ extension MDocHolderBLECentral: CBPeripheralDelegate {
     /// Handle a characteristic value being updated.
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         do {
-            try self.processData(peripheral: peripheral, characteristic: characteristic)
+            try processData(peripheral: peripheral, characteristic: characteristic)
         } catch {
-            self.callback.callback(message: .error(.peripheral("\(error)")))
+            callback.callback(message: .error(.peripheral("\(error)")))
             centralManager?.cancelPeripheralConnection(peripheral)
         }
     }
@@ -465,7 +460,7 @@ extension MDocHolderBLECentral: CBPeripheralDelegate {
     /// This is called after the buffer gets filled to capacity, and then has space again.
     ///
     /// Only available on iOS 11 and up.
-    func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
+    func peripheralIsReady(toSendWriteWithoutResponse _: CBPeripheral) {
         drainWritingQueue()
     }
 
@@ -482,7 +477,6 @@ extension MDocHolderBLECentral: CBPeripheralDelegate {
 }
 
 extension MDocHolderBLECentral: CBPeripheralManagerDelegate {
-
     /// Handle peripheral manager state change.
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         switch peripheral.state {
@@ -505,20 +499,18 @@ extension MDocHolderBLECentral: CBPeripheralManagerDelegate {
 }
 
 extension MDocHolderBLECentral: MDocHolderBLECentralConnectionDelegate {
-
     func request(_ data: Data) {
         incomingMessageBuffer = data
         machinePendingState = .l2capRequestReceived
     }
 
-    func sendUpdate(bytes: Int, total: Int, fraction: Double) {
-        self.callback.callback(message: .uploadProgress(bytes, total))
+    func sendUpdate(bytes: Int, total: Int, fraction _: Double) {
+        callback.callback(message: .uploadProgress(bytes, total))
     }
 
     func sendComplete() {
         machinePendingState = .complete
     }
 
-    func connectionEnd() {
-    }
+    func connectionEnd() {}
 }

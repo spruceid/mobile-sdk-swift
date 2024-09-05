@@ -10,8 +10,8 @@ public class MDocReader {
         self.callback = callback
         do {
             let sessionData = try SpruceIDMobileSdkRs.establishSession(uri: uri, requestedItems: requestedItems, trustAnchorRegistry: trustAnchorRegistry)
-            self.sessionManager = sessionData.state
-            self.bleManager = MDocReaderBLEPeripheral(callback: self, serviceUuid: CBUUID(string: sessionData.uuid), request: sessionData.request, bleIdent: sessionData.bleIdent)
+            sessionManager = sessionData.state
+            bleManager = MDocReaderBLEPeripheral(callback: self, serviceUuid: CBUUID(string: sessionData.uuid), request: sessionData.request, bleIdent: sessionData.bleIdent)
         } catch {
             print("\(error)")
             return nil
@@ -26,24 +26,24 @@ public class MDocReader {
 extension MDocReader: MDocReaderBLEDelegate {
     func callback(message: MDocReaderBLECallback) {
         switch message {
-        case .done(let data):
-            self.callback.update(state: .success(data))
+        case let .done(data):
+            callback.update(state: .success(data))
         case .connected:
-            self.callback.update(state: .connected)
-        case .error(let error):
-            self.callback.update(state: .error(BleReaderSessionError(readerBleError: error)))
-            self.cancel()
-        case .message(let data):
+            callback.update(state: .connected)
+        case let .error(error):
+            callback.update(state: .error(BleReaderSessionError(readerBleError: error)))
+            cancel()
+        case let .message(data):
             do {
-                let responseData = try SpruceIDMobileSdkRs.handleResponse(state: self.sessionManager, response: data)
-                self.sessionManager = responseData.state
-                self.callback.update(state: .success(responseData.verifiedResponse))
+                let responseData = try SpruceIDMobileSdkRs.handleResponse(state: sessionManager, response: data)
+                sessionManager = responseData.state
+                callback.update(state: .success(responseData.verifiedResponse))
             } catch {
-                self.callback.update(state: .error(.generic("\(error)")))
-                self.cancel()
+                callback.update(state: .error(.generic("\(error)")))
+                cancel()
             }
-        case .downloadProgress(let index):
-            self.callback.update(state: .downloadProgress(index))
+        case let .downloadProgress(index):
+            callback.update(state: .downloadProgress(index))
         }
     }
 }
@@ -78,9 +78,9 @@ public enum BleReaderSessionError {
 
     init(readerBleError: MdocReaderBleError) {
         switch readerBleError {
-        case .server(let string):
+        case let .server(string):
             self = .server(string)
-        case .bluetooth(let string):
+        case let .bluetooth(string):
             self = .bluetooth(string)
         }
     }

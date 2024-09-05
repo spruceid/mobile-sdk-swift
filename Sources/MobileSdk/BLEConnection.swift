@@ -147,7 +147,7 @@ class BLEInternalConnection: NSObject, StreamDelegate {
     func streamSpaceAvailable() { print("The stream has space available.") }
     func streamError() { print("Stream error.") }
     func streamUnknownEvent() { print("Stream unknown event.") }
-    func streamSentData(bytes _: Int, total: Int, fraction: Double) { print("Stream sent data.") }
+    func streamSentData(bytes _: Int, total _: Int, fraction _: Double) { print("Stream sent data.") }
     func streamReceivedData(_: Data) { print("Stream received data.") }
 }
 

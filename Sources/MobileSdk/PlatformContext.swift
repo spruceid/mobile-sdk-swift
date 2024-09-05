@@ -18,8 +18,8 @@ import Foundation
 //    A container for platform-specific subsystems.
 
 class SpruceKitPlatformContext: NSObject {
-   let keyMgr     = KeyManager()     // Keys
-   let storageMgr = StorageManager() // Secure storage.
+    let keyMgr = KeyManager() // Keys
+    let storageMgr = StorageManager() // Secure storage.
 }
 
 //

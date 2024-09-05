@@ -13,13 +13,13 @@ public class W3CVC: Credential {
         if let data = credentialString.data(using: .utf8) {
             do {
                 let json = try JSONDecoder().decode(GenericJSON.self, from: data)
-                self.credential = json
+                credential = json
                 super.init(id: json["id"]!.toString())
             } catch let error as NSError {
                 throw error
             }
         } else {
-            self.credential = nil
+            credential = nil
             super.init(id: "")
             throw W3CError.initializationError("Failed to process credential string.")
         }
@@ -31,6 +31,5 @@ public class W3CVC: Credential {
         } else {
             return [:]
         }
-
     }
 }

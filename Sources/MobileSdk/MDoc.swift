@@ -15,10 +15,10 @@ public class MDoc: Credential {
     /// namespaces is the full set of namespaces with data items and their value
     /// IssuerSignedItemBytes will be bytes, but its composition is defined here
     /// https://github.com/spruceid/isomdl/blob/f7b05dfa/src/definitions/issuer_signed.rs#L18
-    public init?(fromMDoc issuerAuth: Data, namespaces: [MDocNamespace: [IssuerSignedItemBytes]], keyAlias: String) {
+    public init?(fromMDoc issuerAuth: Data, namespaces _: [MDocNamespace: [IssuerSignedItemBytes]], keyAlias: String) {
         self.keyAlias = keyAlias
         do {
-            try self.inner = SpruceIDMobileSdkRs.MDoc.fromCbor(value: issuerAuth)
+            try inner = SpruceIDMobileSdkRs.MDoc.fromCbor(value: issuerAuth)
         } catch {
             print("\(error)")
             return nil
@@ -44,15 +44,15 @@ public class BLESessionManager {
     var mdoc: MDoc
     var bleManager: MDocHolderBLECentral!
 
-    init?(mdoc: MDoc, engagement: DeviceEngagement, callback: BLESessionStateDelegate) {
+    init?(mdoc: MDoc, engagement _: DeviceEngagement, callback: BLESessionStateDelegate) {
         self.callback = callback
-        self.uuid = UUID()
+        uuid = UUID()
         self.mdoc = mdoc
         do {
             let sessionData = try SpruceIDMobileSdkRs.initialiseSession(document: mdoc.inner,
-                                                                        uuid: self.uuid.uuidString)
-            self.state = sessionData.state
-            bleManager = MDocHolderBLECentral(callback: self, serviceUuid: CBUUID(nsuuid: self.uuid))
+                                                                        uuid: uuid.uuidString)
+            state = sessionData.state
+            bleManager = MDocHolderBLECentral(callback: self, serviceUuid: CBUUID(nsuuid: uuid))
             self.callback.update(state: .engagingQRCode(sessionData.qrCodeUri.data(using: .ascii)!))
         } catch {
             print("\(error)")
@@ -70,8 +70,8 @@ public class BLESessionManager {
             let payload = try SpruceIDMobileSdkRs.submitResponse(sessionManager: sessionManager!,
                                                                  permittedItems: items)
             let query = [kSecClass: kSecClassKey,
-          kSecAttrApplicationLabel: self.mdoc.keyAlias,
-                     kSecReturnRef: true] as [String: Any]
+                         kSecAttrApplicationLabel: mdoc.keyAlias,
+                         kSecReturnRef: true] as [String: Any]
 
             // Find and cast the result as a SecKey instance.
             var item: CFTypeRef?
@@ -80,31 +80,32 @@ public class BLESessionManager {
             case errSecSuccess:
                 // swiftlint:disable force_cast
                 secKey = item as! SecKey
-                // swiftlint:enable force_cast
+            // swiftlint:enable force_cast
             case errSecItemNotFound:
-                self.callback.update(state: .error(.generic("Key not found")))
-                self.cancel()
+                callback.update(state: .error(.generic("Key not found")))
+                cancel()
                 return
             case let status:
-                self.callback.update(state: .error(.generic("Keychain read failed: \(status)")))
-                self.cancel()
+                callback.update(state: .error(.generic("Keychain read failed: \(status)")))
+                cancel()
                 return
             }
             var error: Unmanaged<CFError>?
             guard let derSignature = SecKeyCreateSignature(secKey,
                                                            .ecdsaSignatureMessageX962SHA256,
                                                            payload as CFData,
-                                                           &error) as Data? else {
-                self.callback.update(state: .error(.generic("Failed to sign message: \(error.debugDescription)")))
-                self.cancel()
+                                                           &error) as Data?
+            else {
+                callback.update(state: .error(.generic("Failed to sign message: \(error.debugDescription)")))
+                cancel()
                 return
             }
             let response = try SpruceIDMobileSdkRs.submitSignature(sessionManager: sessionManager!,
-                                                                     derSignature: derSignature)
-            self.bleManager.writeOutgoingValue(data: response)
+                                                                   derSignature: derSignature)
+            bleManager.writeOutgoingValue(data: response)
         } catch {
-            self.callback.update(state: .error(.generic("\(error)")))
-            self.cancel()
+            callback.update(state: .error(.generic("\(error)")))
+            cancel()
         }
     }
 }
@@ -113,23 +114,23 @@ extension BLESessionManager: MDocBLEDelegate {
     func callback(message: MDocBLECallback) {
         switch message {
         case .done:
-            self.callback.update(state: .success)
+            callback.update(state: .success)
         case .connected:
-            self.callback.update(state: .connected)
-        case .uploadProgress(let value, let total):
-            self.callback.update(state: .uploadProgress(value, total))
-        case .message(let data):
+            callback.update(state: .connected)
+        case let .uploadProgress(value, total):
+            callback.update(state: .uploadProgress(value, total))
+        case let .message(data):
             do {
-                let requestData = try SpruceIDMobileSdkRs.handleRequest(state: self.state, request: data)
-                self.sessionManager = requestData.sessionManager
-                self.callback.update(state: .selectNamespaces(requestData.itemsRequests))
+                let requestData = try SpruceIDMobileSdkRs.handleRequest(state: state, request: data)
+                sessionManager = requestData.sessionManager
+                callback.update(state: .selectNamespaces(requestData.itemsRequests))
             } catch {
-                self.callback.update(state: .error(.generic("\(error)")))
-                self.cancel()
+                callback.update(state: .error(.generic("\(error)")))
+                cancel()
             }
-        case .error(let error):
-            self.callback.update(state: .error(BleSessionError(holderBleError: error)))
-            self.cancel()
+        case let .error(error):
+            callback.update(state: .error(BleSessionError(holderBleError: error)))
+            cancel()
         }
     }
 }
@@ -144,9 +145,9 @@ public enum BleSessionError {
 
     init(holderBleError: MdocHolderBleError) {
         switch holderBleError {
-        case .peripheral(let string):
+        case let .peripheral(string):
             self = .peripheral(string)
-        case .bluetooth(let string):
+        case let .bluetooth(string):
             self = .bluetooth(string)
         }
     }

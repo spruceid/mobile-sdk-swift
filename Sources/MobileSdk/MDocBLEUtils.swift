@@ -77,35 +77,33 @@ func MDocCharacteristicName(_ ch: CBCharacteristic) -> String {
 /// Return a string describing a BLE characteristic given its UUID.
 func MDocCharacteristicNameFromUUID(_ ch: CBUUID) -> String {
     return switch ch {
-    case holderStateCharacteristicId:         "Holder:State"
+    case holderStateCharacteristicId: "Holder:State"
     case holderClient2ServerCharacteristicId: "Holder:Client2Server"
     case holderServer2ClientCharacteristicId: "Holder:Server2Client"
-    case holderL2CAPCharacteristicId:         "Holder:L2CAP"
-
-    case readerStateCharacteristicId:         "Reader:State"
+    case holderL2CAPCharacteristicId: "Holder:L2CAP"
+    case readerStateCharacteristicId: "Reader:State"
     case readerClient2ServerCharacteristicId: "Reader:Client2Server"
     case readerServer2ClientCharacteristicId: "Reader:Server2Client"
-    case readerIdentCharacteristicId:         "Reader:Ident"
-    case readerL2CAPCharacteristicId:         "Reader:L2CAP"
-
-    default:                                  "Unknown:\(ch)"
+    case readerIdentCharacteristicId: "Reader:Ident"
+    case readerL2CAPCharacteristicId: "Reader:L2CAP"
+    default: "Unknown:\(ch)"
     }
 }
 
 /// Print a description of a BLE characteristic.
 func MDocDesribeCharacteristic(_ ch: CBCharacteristic) {
-    print("        \(MDocCharacteristicName(ch)) ( ", terminator:"")
+    print("        \(MDocCharacteristicName(ch)) ( ", terminator: "")
 
-    if(ch.properties.contains(.broadcast))                  { print("broadcast",                  terminator:" ") }
-    if(ch.properties.contains(.read))                       { print("read",                       terminator:" ") }
-    if(ch.properties.contains(.writeWithoutResponse))       { print("writeWithoutResponse",       terminator:" ") }
-    if(ch.properties.contains(.write))                      { print("write",                      terminator:" ") }
-    if(ch.properties.contains(.notify))                     { print("notify",                     terminator:" ") } 
-    if(ch.properties.contains(.indicate))                   { print("indicate",                   terminator:" ") }
-    if(ch.properties.contains(.authenticatedSignedWrites))  { print("authenticatedSignedWrites",  terminator:" ") }
-    if(ch.properties.contains(.extendedProperties))         { print("extendedProperties",         terminator:" ") }
-    if(ch.properties.contains(.notifyEncryptionRequired))   { print("notifyEncryptionRequired",   terminator:" ") }
-    if(ch.properties.contains(.indicateEncryptionRequired)) { print("indicateEncryptionRequired", terminator:" ") }
+    if ch.properties.contains(.broadcast) { print("broadcast", terminator: " ") }
+    if ch.properties.contains(.read) { print("read", terminator: " ") }
+    if ch.properties.contains(.writeWithoutResponse) { print("writeWithoutResponse", terminator: " ") }
+    if ch.properties.contains(.write) { print("write", terminator: " ") }
+    if ch.properties.contains(.notify) { print("notify", terminator: " ") }
+    if ch.properties.contains(.indicate) { print("indicate", terminator: " ") }
+    if ch.properties.contains(.authenticatedSignedWrites) { print("authenticatedSignedWrites", terminator: " ") }
+    if ch.properties.contains(.extendedProperties) { print("extendedProperties", terminator: " ") }
+    if ch.properties.contains(.notifyEncryptionRequired) { print("notifyEncryptionRequired", terminator: " ") }
+    if ch.properties.contains(.indicateEncryptionRequired) { print("indicateEncryptionRequired", terminator: " ") }
     print(")")
 
     if let descriptors = ch.descriptors {

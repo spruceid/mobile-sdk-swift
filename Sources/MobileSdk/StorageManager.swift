@@ -31,9 +31,9 @@ class StorageManager: NSObject, StorageManagerInterface {
             let bundle = Bundle.main
 
             let asdir = try fileman.url(for: .applicationSupportDirectory,
-                                   in: .userDomainMask,
-                                   appropriateFor: nil, // Ignored
-                                   create: true) // May not exist, make if necessary.
+                                        in: .userDomainMask,
+                                        appropriateFor: nil, // Ignored
+                                        create: true) // May not exist, make if necessary.
 
             //    If we create subdirectories in the application support directory, we need to put them in a subdir
             // named after the app; normally, that's `CFBundleDisplayName` from `info.plist`, but that key doesn't

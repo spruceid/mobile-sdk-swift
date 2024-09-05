@@ -8,11 +8,11 @@ public class CredentialStore {
     }
 
     // swiftlint:disable force_cast
-    public func presentMdocBLE(deviceEngagement: DeviceEngagement,
+    public func presentMdocBLE(deviceEngagement _: DeviceEngagement,
                                callback: BLESessionStateDelegate
                                // , trustedReaders: TrustedReaders
     ) -> BLESessionManager? {
-        if let firstMdoc = self.credentials.first(where: {$0 is MDoc}) {
+        if let firstMdoc = credentials.first(where: { $0 is MDoc }) {
             return BLESessionManager(mdoc: firstMdoc as! MDoc, engagement: DeviceEngagement.QRCode, callback: callback)
         } else {
             return nil

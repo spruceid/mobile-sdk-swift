@@ -28,6 +28,7 @@ class MDocReaderBLEPeripheral: NSObject {
     var identCharacteristic: CBMutableCharacteristic?
     var l2capCharacteristic: CBMutableCharacteristic?
     var requestData: Data
+    var requestSent = false
     var maximumCharacteristicSize: Int?
     var writingQueueTotalChunks: Int?
     var writingQueueChunkIndex: Int?
@@ -37,7 +38,7 @@ class MDocReaderBLEPeripheral: NSObject {
 
     /// If this is `true`, we offer an L2CAP characteristic and set up an L2CAP stream.  If it is `false` we do neither
     /// of these things, and use the old flow.
-    var useL2CAP = true
+    var useL2CAP: Bool
 
     private var channelPSM: UInt16? {
         didSet {
@@ -52,10 +53,11 @@ class MDocReaderBLEPeripheral: NSObject {
         }
     }
 
-    init(callback: MDocReaderBLEDelegate, serviceUuid: CBUUID, request: Data, bleIdent: Data) {
+    init(callback: MDocReaderBLEDelegate, serviceUuid: CBUUID, request: Data, bleIdent: Data, useL2CAP: Bool) {
         self.serviceUuid = serviceUuid
         self.callback = callback
         self.bleIdent = bleIdent
+        self.useL2CAP = useL2CAP
         requestData = request
         incomingMessageBuffer = Data()
         super.init()
@@ -127,7 +129,15 @@ class MDocReaderBLEPeripheral: NSObject {
                 }
 
             case .l2capStreamOpen: // An L2CAP stream is opened.
-                activeStream?.send(data: requestData)
+                if !requestSent {
+                    // We occasionally seem to get a transient condition where the stream gets opened
+                    // more than once; locally, I've seen the stream open 10 times in a row, and with
+                    // the non-framed transport for data, that means we send the request 10 times, the
+                    // far side reads that as a single request, and errors out.  The requestSent bool
+                    // is to keep this from happening.
+                    activeStream?.send(data: requestData)
+                    requestSent = true
+                }
                 machineState = .l2capSendingRequest
                 machinePendingState = .l2capSendingRequest
                 update = true

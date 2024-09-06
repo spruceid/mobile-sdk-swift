@@ -8,6 +8,7 @@ class BLEInternalL2CAPConnection: NSObject, StreamDelegate {
     var channel: CBL2CAPChannel?
 
     private var outputData = Data()
+    private var outputDelivered = false
     private var incomingData = Data()
     private var incomingTime = Date(timeIntervalSinceNow: 0)
     private var incomingDelivered = false
@@ -52,9 +53,12 @@ class BLEInternalL2CAPConnection: NSObject, StreamDelegate {
 
     /// Public send() interface.
     public func send(data: Data) {
-        outputData.append(data)
-        totalBytesWritten = 0
-        send()
+        if !outputDelivered {
+            outputDelivered = true
+            outputData = data
+            totalBytesWritten = 0
+            send()
+        }
     }
 
     /// Internal send() interface.

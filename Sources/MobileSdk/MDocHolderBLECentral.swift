@@ -50,7 +50,7 @@ class MDocHolderBLECentral: NSObject {
     private var activeStream: MDocHolderBLECentralConnection?
 
     /// If this is `false`, we decline to connect to L2CAP even if it is offered.
-    var useL2CAP = true
+    var useL2CAP: Bool
 
     var machineState = MachineState.initial
     var machinePendingState = MachineState.initial {
@@ -59,9 +59,10 @@ class MDocHolderBLECentral: NSObject {
         }
     }
 
-    init(callback: MDocBLEDelegate, serviceUuid: CBUUID) {
+    init(callback: MDocBLEDelegate, serviceUuid: CBUUID, useL2CAP: Bool) {
         self.serviceUuid = serviceUuid
         self.callback = callback
+        self.useL2CAP = useL2CAP
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }

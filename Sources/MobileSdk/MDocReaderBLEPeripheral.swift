@@ -38,7 +38,7 @@ class MDocReaderBLEPeripheral: NSObject {
 
     /// If this is `true`, we offer an L2CAP characteristic and set up an L2CAP stream.  If it is `false` we do neither
     /// of these things, and use the old flow.
-    var useL2CAP: Bool
+    var useL2CAP = true
 
     private var channelPSM: UInt16? {
         didSet {
@@ -53,11 +53,10 @@ class MDocReaderBLEPeripheral: NSObject {
         }
     }
 
-    init(callback: MDocReaderBLEDelegate, serviceUuid: CBUUID, request: Data, bleIdent: Data, useL2CAP: Bool) {
+    init(callback: MDocReaderBLEDelegate, serviceUuid: CBUUID, request: Data, bleIdent: Data) {
         self.serviceUuid = serviceUuid
         self.callback = callback
         self.bleIdent = bleIdent
-        self.useL2CAP = useL2CAP
         requestData = request
         incomingMessageBuffer = Data()
         super.init()

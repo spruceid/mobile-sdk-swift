@@ -10,8 +10,7 @@ public class MDocReader {
         callback: BLEReaderSessionStateDelegate,
         uri: String,
         requestedItems: [String: [String: Bool]],
-        trustAnchorRegistry: [String]?,
-        useL2CAP: Bool = true
+        trustAnchorRegistry: [String]?
     ) {
         self.callback = callback
         do {
@@ -22,8 +21,7 @@ public class MDocReader {
             self.bleManager = MDocReaderBLEPeripheral(callback: self,
                                                       serviceUuid: CBUUID(string: sessionData.uuid),
                                                       request: sessionData.request,
-                                                      bleIdent: sessionData.bleIdent,
-                                                      useL2CAP: useL2CAP)
+                                                      bleIdent: sessionData.bleIdent)
         } catch {
             print("\(error)")
             return nil

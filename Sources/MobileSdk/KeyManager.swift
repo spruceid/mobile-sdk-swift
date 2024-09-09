@@ -2,11 +2,15 @@ import CoreFoundation
 import Foundation
 import Security
 
-public class KeyManager: NSObject {
+import SpruceIDMobileSdkRs
+
+public class KeyManager: NSObject, KeyManagerInterface {
+
+    
     /**
      * Resets the key store by removing all of the keys.
      */
-    public static func reset() -> Bool {
+    public func reset() -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey
         ]
@@ -18,7 +22,7 @@ public class KeyManager: NSObject {
     /**
      * Checks to see if a secret key exists based on the id/alias.
      */
-    public static func keyExists(id: String) -> Bool {
+    public func keyExists(id: SpruceIDMobileSdkRs.Key) -> Bool {
         let tag = id.data(using: .utf8)!
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
@@ -35,7 +39,7 @@ public class KeyManager: NSObject {
     /**
      * Returns a secret key - based on the id of the key.
      */
-    public static func getSecretKey(id: String) -> SecKey? {
+    public static func getSecretKey(id: SpruceIDMobileSdkRs.Key) -> SecKey? {
       let tag = id.data(using: .utf8)!
       let query: [String: Any] = [
           kSecClass as String: kSecClassKey,
@@ -59,7 +63,7 @@ public class KeyManager: NSObject {
     /**
      * Generates a secp256r1 signing key by id
      */
-    public static func generateSigningKey(id: String) -> Bool {
+    public func generateSigningKey(id: SpruceIDMobileSdkRs.Key) -> Bool {
         let tag = id.data(using: .utf8)!
 
         let access = SecAccessControlCreateWithFlags(
@@ -89,16 +93,16 @@ public class KeyManager: NSObject {
     /**
      * Returns a JWK for a particular secret key by key id.
      */
-    public static func getJwk(id: String) -> String? {
-      guard let key = getSecretKey(id: id) else { return nil }
+    public func getJwk(id: SpruceIDMobileSdkRs.Key) throws -> String {
+        guard let key = KeyManager.getSecretKey(id: id) else { throw KeyManagerError.KeyNotFound }
 
       guard let publicKey = SecKeyCopyPublicKey(key) else {
-          return nil
+          throw KeyManagerError.KeyInvalid
       }
 
       var error: Unmanaged<CFError>?
       guard let data = SecKeyCopyExternalRepresentation(publicKey, &error) as? Data else {
-         return nil
+          throw KeyManagerError.UnexpectedUniFfiCallbackError("Failed to copy external representation")
       }
 
       let fullData: Data = data.subdata(in: 1..<data.count)
@@ -115,7 +119,7 @@ public class KeyManager: NSObject {
          "y": yCoordinate
       ]
 
-      guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else { return nil }
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) else { throw KeyManagerError.UnexpectedUniFfiCallbackError("Failed to serialize JWT") }
       let jsonString = String(data: jsonData, encoding: String.Encoding.ascii)!
 
       return jsonString
@@ -124,32 +128,34 @@ public class KeyManager: NSObject {
     /**
      * Signs the provided payload with a ecdsaSignatureMessageX962SHA256 private key.
      */
-    public static func signPayload(id: String, payload: [UInt8]) -> [UInt8]? {
-        guard let key = getSecretKey(id: id) else { return nil }
+    public func signPayload(id: SpruceIDMobileSdkRs.Key, payload: Data) throws -> Data {
+        guard let key = KeyManager.getSecretKey(id: id) else { throw KeyManagerError.KeyNotFound }
 
-        guard let data = CFDataCreate(kCFAllocatorDefault, payload, payload.count) else {
-            return nil
+        
+        let data = try? payload.withUnsafeBytes<UInt8> { (paypointer: UnsafeRawBufferPointer) in
+            CFDataCreate(kCFAllocatorDefault, paypointer.baseAddress, payload.count)
         }
+        
 
         let algorithm: SecKeyAlgorithm = .ecdsaSignatureMessageX962SHA256
         var error: Unmanaged<CFError>?
         guard let signature = SecKeyCreateSignature(
             key,
             algorithm,
-            data,
+            data!,
             &error
         ) as Data? else {
           print(error ?? "no error")
-            return nil
+            throw KeyManagerError.FailedToSign
         }
 
-        return [UInt8](signature)
+        return Data(signature)
     }
 
     /**
      * Generates an encryption key with a provided id in the Secure Enclave.
      */
-    public static func generateEncryptionKey(id: String) -> Bool {
+    public func generateEncryptionKey(id: SpruceIDMobileSdkRs.Key) -> Bool {
         let tag = id.data(using: .utf8)!
 
         let access = SecAccessControlCreateWithFlags(
@@ -179,40 +185,40 @@ public class KeyManager: NSObject {
     /**
      * Encrypts payload by a key referenced by key id.
      */
-    public static func encryptPayload(id: String, payload: [UInt8]) -> ([UInt8], [UInt8])? {
-        guard let key = getSecretKey(id: id) else { return nil }
+    public func encryptPayload(id: SpruceIDMobileSdkRs.Key, payload: Data) throws -> EncryptedPayload {
+        guard let key = KeyManager.getSecretKey(id: id) else { throw KeyManagerError.KeyNotFound }
 
         guard let publicKey = SecKeyCopyPublicKey(key) else {
-            return nil
+            throw KeyManagerError.FailedToEncrypt
         }
 
-        guard let data = CFDataCreate(kCFAllocatorDefault, payload, payload.count) else {
-            return nil
+        let data = try? payload.withUnsafeBytes<UInt8> { ( paypointer: UnsafeRawBufferPointer) in
+            CFDataCreate(kCFAllocatorDefault, paypointer.baseAddress, payload.count)
         }
-
+        
         let algorithm: SecKeyAlgorithm = .eciesEncryptionCofactorX963SHA512AESGCM
         var error: Unmanaged<CFError>?
 
         guard let encrypted = SecKeyCreateEncryptedData(
             publicKey,
             algorithm,
-            data,
+            data!,
             &error
         ) as Data? else {
-            return nil
+            throw KeyManagerError.FailedToEncrypt
         }
 
-        return ([0], [UInt8](encrypted))
+        return ( EncryptedPayload(iv: Data([0]), ciphertext: encrypted) )
     }
 
     /**
      * Decrypts the provided payload by a key id and initialization vector.
      */
-    public static func decryptPayload(id: String, payload: [UInt8]) -> [UInt8]? {
-        guard let key = getSecretKey(id: id) else { return nil }
+    public func decryptPayload(id: SpruceIDMobileSdkRs.Key, encryptedPayload: EncryptedPayload) throws -> Data {
+        guard let key = KeyManager.getSecretKey(id: id) else { throw KeyManagerError.KeyNotFound }
 
-        guard let data = CFDataCreate(kCFAllocatorDefault, payload, payload.count) else {
-            return nil
+        let data = encryptedPayload.ciphertext().withUnsafeBytes { (paypointer: UnsafeRawBufferPointer) in
+            CFDataCreate(kCFAllocatorDefault, paypointer.baseAddress, encryptedPayload.ciphertext().count)
         }
 
         let algorithm: SecKeyAlgorithm = .eciesEncryptionCofactorX963SHA512AESGCM
@@ -220,12 +226,12 @@ public class KeyManager: NSObject {
         guard let decrypted = SecKeyCreateDecryptedData(
             key,
             algorithm,
-            data,
+            data!,
             &error
         ) as Data? else {
-            return nil
+            throw KeyManagerError.FailedToDecrypt
         }
 
-        return [UInt8](decrypted)
+        return Data(decrypted)
     }
 }

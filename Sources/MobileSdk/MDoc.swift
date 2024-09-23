@@ -8,7 +8,7 @@ public typealias IssuerSignedItemBytes = Data
 public typealias ItemsRequest = SpruceIDMobileSdkRs.ItemsRequest
 
 public class MDoc: Credential {
-    var inner: SpruceIDMobileSdkRs.MDoc
+    var inner: SpruceIDMobileSdkRs.Mdoc
     var keyAlias: String
 
     /// issuerAuth is the signed MSO (i.e. CoseSign1 with MSO as payload)
@@ -18,7 +18,7 @@ public class MDoc: Credential {
     public init?(fromMDoc issuerAuth: Data, namespaces: [MDocNamespace: [IssuerSignedItemBytes]], keyAlias: String) {
         self.keyAlias = keyAlias
         do {
-            try self.inner = SpruceIDMobileSdkRs.MDoc.fromCbor(value: issuerAuth)
+            try self.inner = SpruceIDMobileSdkRs.Mdoc.fromCborEncodedDocument(cborEncodedDocument: issuerAuth, keyAlias: keyAlias)
         } catch {
             print("\(error)")
             return nil

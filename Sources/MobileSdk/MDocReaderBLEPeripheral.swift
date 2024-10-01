@@ -505,7 +505,7 @@ extension MDocReaderBLEPeripheral: CBPeripheralManagerDelegate {
 extension MDocReaderBLEPeripheral: MDocReaderBLEPeriConnDelegate {
     func streamOpen() {
         // This sometimes gets hit multiple times.
-        if (machinePendingState == .l2capChannelPublished) {
+        if machinePendingState == .l2capChannelPublished {
             machinePendingState = .l2capStreamOpen
         }
     }

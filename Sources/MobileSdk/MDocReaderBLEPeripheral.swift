@@ -116,11 +116,11 @@ class MDocReaderBLEPeripheral: NSObject {
 
                 // Setting the encryption flag here appears to break at least some Android devices; if `withEncryption`
                 // is set, when the Android device calls `.connect()` on the socket it throws a "resource not
-                // available" exception.  I don't believe we want to disable encryption here, so I'm leaving it as
-                // is, and making Android recover from the exception and fall back to the old flow.  Support code for
+                // available" exception.  The data is already encrypted, so I'm setting it to false, and making Android
+                // recover from the exception and fall back to the old flow if necessary as well.  Support code for
                 // failover is in the next two states, below.
 
-                peripheralManager.publishL2CAPChannel(withEncryption: true)
+                peripheralManager.publishL2CAPChannel(withEncryption: false)
                 update = true
 
             case .l2capAwaitChannelPublished:
@@ -504,7 +504,10 @@ extension MDocReaderBLEPeripheral: CBPeripheralManagerDelegate {
 /// L2CAP Stream delegate functions.
 extension MDocReaderBLEPeripheral: MDocReaderBLEPeriConnDelegate {
     func streamOpen() {
-        machinePendingState = .l2capStreamOpen
+        // This sometimes gets hit multiple times.
+        if (machinePendingState == .l2capChannelPublished) {
+            machinePendingState = .l2capStreamOpen
+        }
     }
 
     func sentData(_ bytes: Int) {

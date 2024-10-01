@@ -18,40 +18,47 @@ public class IsoMdlPresentation {
     var mdoc: MDoc
     var bleManager: MDocHolderBLECentral!
     var useL2CAP: Bool
-    
-    init?(mdoc: MDoc, engagement: DeviceEngagement, callback: BLESessionStateDelegate, useL2CAP: Bool) async {
+
+    init?(
+        mdoc: MDoc, engagement: DeviceEngagement,
+        callback: BLESessionStateDelegate, useL2CAP: Bool
+    ) async {
         self.callback = callback
         self.uuid = UUID()
         self.mdoc = mdoc
         self.useL2CAP = useL2CAP
         do {
-            self.session = try await SpruceIDMobileSdkRs.initializeMdlPresentationFromBytes(mdoc: mdoc.inner, uuid: self.uuid.uuidString)
+            self.session =
+                try await SpruceIDMobileSdkRs.initializeMdlPresentationFromBytes(
+                    mdoc: mdoc.inner, uuid: self.uuid.uuidString)
             bleManager = MDocHolderBLECentral(
                 callback: self,
                 serviceUuid: CBUUID(nsuuid: self.uuid),
                 useL2CAP: useL2CAP)
-            self.callback.update(state: .engagingQRCode(session.getQrCodeUri().data(using: .ascii)!))
+            self.callback.update(
+                state: .engagingQRCode(
+                    session.getQrCodeUri().data(using: .ascii)!))
         } catch {
             print("\(error)")
             return nil
         }
     }
-    
+
     // Cancel the request mid-transaction and gracefully clean up the BLE stack.
     public func cancel() {
         bleManager.disconnectFromDevice(session: self.session)
     }
-    
+
     public func submitNamespaces(items: [String: [String: [String]]]) {
         do {
             let payload = try session.generateResponse(permittedItems: items)
             let query =
-            [
-                kSecClass: kSecClassKey,
-                kSecAttrApplicationLabel: self.mdoc.keyAlias,
-                kSecReturnRef: true
-            ] as [String: Any]
-            
+                [
+                    kSecClass: kSecClassKey,
+                    kSecAttrApplicationLabel: self.mdoc.keyAlias,
+                    kSecReturnRef: true
+                ] as [String: Any]
+
             // Find and cast the result as a SecKey instance.
             var item: CFTypeRef?
             var secKey: SecKey
@@ -59,13 +66,14 @@ public class IsoMdlPresentation {
             case errSecSuccess:
                 // swiftlint:disable force_cast
                 secKey = item as! SecKey
-                // swiftlint:enable force_cast
+            // swiftlint:enable force_cast
             case errSecItemNotFound:
                 self.callback.update(state: .error(.generic("Key not found")))
                 self.cancel()
                 return
             case let status:
-                self.callback.update(state: .error(.generic("Keychain read failed: \(status)")))
+                self.callback.update(
+                    state: .error(.generic("Keychain read failed: \(status)")))
                 self.cancel()
                 return
             }
@@ -78,11 +86,15 @@ public class IsoMdlPresentation {
                     &error) as Data?
             else {
                 self.callback.update(
-                    state: .error(.generic("Failed to sign message: \(error.debugDescription)")))
+                    state: .error(
+                        .generic(
+                            "Failed to sign message: \(error.debugDescription)")
+                    ))
                 self.cancel()
                 return
             }
-            let response = try session.submitResponse(derSignature: derSignature)
+            let response = try session.submitResponse(
+                derSignature: derSignature)
             self.bleManager.writeOutgoingValue(data: response)
         } catch {
             self.callback.update(state: .error(.generic("\(error)")))
@@ -109,7 +121,8 @@ extension IsoMdlPresentation: MDocBLEDelegate {
                 self.cancel()
             }
         case .error(let error):
-            self.callback.update(state: .error(BleSessionError(holderBleError: error)))
+            self.callback.update(
+                state: .error(BleSessionError(holderBleError: error)))
             self.cancel()
         }
     }
@@ -122,7 +135,7 @@ public enum BleSessionError {
     case bluetooth(CBCentralManager)
     /// Generic unrecoverable error
     case generic(String)
-    
+
     init(holderBleError: MdocHolderBleError) {
         switch holderBleError {
         case .peripheral(let string):

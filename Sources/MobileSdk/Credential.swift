@@ -3,11 +3,11 @@ import SpruceIDMobileSdkRs
 
 open class Credential: Identifiable {
     public var id: String
-    
+
     public init(id: String) {
         self.id = id
     }
-    
+
     open func get(keys: [String]) -> [String: GenericJSON] {
         if keys.contains("id") {
             return ["id": GenericJSON.string(self.id)]
@@ -22,18 +22,18 @@ extension Mdoc {
     public func jsonEncodedDetails() -> [String: GenericJSON] {
         self.jsonEncodedDetailsInternal(containing: nil)
     }
-    
+
     /// Access the specified elements in the mdoc, ignoring namespaces and missing elements that cannot be encoded as JSON.
     public func jsonEncodedDetails(containing elementIdentifiers: [String]) -> [String: GenericJSON] {
         self.jsonEncodedDetailsInternal(containing: elementIdentifiers)
     }
-    
+
     private func jsonEncodedDetailsInternal(containing elementIdentifiers: [String]?) -> [String: GenericJSON] {
         // Ignore the namespaces.
         Dictionary(uniqueKeysWithValues: self.details().flatMap {
             $1.compactMap {
                 let id = $0.identifier
-                
+
                 // If a filter is provided, filter out non-specified ids.
                 if let ids = elementIdentifiers {
                     if !ids.contains(id) {
@@ -72,10 +72,10 @@ extension JwtVc {
         print("failed to decode VCDM data from UTF-8")
         return [:]
     }
-    
+
     /// Access the specified claims from the W3C VCDM credential (not including the JWT envelope).
     public func credentialClaims(containing claimNames: [String]) -> [String: GenericJSON] {
-        self.credentialClaims().filter() {
+        self.credentialClaims().filter {
             (key, _) in
             claimNames.contains(key)
         }
@@ -100,10 +100,10 @@ extension JsonVc {
         print("failed to decode VCDM data from UTF-8")
         return [:]
     }
-    
+
     /// Access the specified claims from the W3C VCDM credential.
     public func credentialClaims(containing claimNames: [String]) -> [String: GenericJSON] {
-        self.credentialClaims().filter() {
+        self.credentialClaims().filter {
             (key, _) in
             claimNames.contains(key)
         }

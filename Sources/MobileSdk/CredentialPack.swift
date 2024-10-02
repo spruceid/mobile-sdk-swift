@@ -2,39 +2,38 @@ import Foundation
 import SpruceIDMobileSdkRs
 import CryptoKit
 
-
 public class CredentialPack {
-    
+
     private var credentials: [ParsedCredential]
-    
+
     /// Initialize an empty CredentialPack.
     public init() {
         self.credentials = []
     }
-    
+
     /// Initialize a CredentialPack from existing credentials.
     public init(credentials: [ParsedCredential]) {
         self.credentials = credentials
     }
-    
+
     /// Add a JwtVc to the CredentialPack.
     public func addJwtVc(jwtVc: JwtVc) -> [ParsedCredential] {
         self.credentials.append(ParsedCredential.newJwtVcJson(jwtVc: jwtVc))
         return self.credentials
     }
-    
+
     /// Add a JsonVc to the CredentialPack.
     public func addJsonVc(jsonVc: JsonVc) -> [ParsedCredential] {
         self.credentials.append(ParsedCredential.newLdpVc(jsonVc: jsonVc))
         return self.credentials
     }
-    
+
     /// Add an Mdoc to the CredentialPack.
     public func addMDoc(mdoc: Mdoc) -> [ParsedCredential] {
         self.credentials.append(ParsedCredential.newMsoMdoc(mdoc: mdoc))
         return self.credentials
     }
-    
+
     /// Find credential claims from all credentials in this CredentialPack.
     public func findCredentialClaims(claimNames: [String]) -> [Uuid: [String: GenericJSON]] {
         Dictionary(uniqueKeysWithValues: self.list()
@@ -59,19 +58,19 @@ public class CredentialPack {
                 return (credential.id(), claims)
             })
     }
-    
+
     /// Get credentials by id.
     public func get(credentialsIds: [Uuid]) -> [ParsedCredential] {
         return self.credentials.filter {
             credentialsIds.contains($0.id())
         }
     }
-    
+
     /// Get a credential by id.
     public func get(credentialId: Uuid) -> ParsedCredential? {
         return self.credentials.first(where: { $0.id() == credentialId })
     }
-    
+
     /// List all of the credentials in the CredentialPack.
     public func list() -> [ParsedCredential] {
         return self.credentials

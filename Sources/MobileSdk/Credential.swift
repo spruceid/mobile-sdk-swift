@@ -23,7 +23,8 @@ extension Mdoc {
         self.jsonEncodedDetailsInternal(containing: nil)
     }
 
-    /// Access the specified elements in the mdoc, ignoring namespaces and missing elements that cannot be encoded as JSON.
+    /// Access the specified elements in the mdoc, ignoring namespaces and missing elements that cannot be encoded as
+    /// JSON.
     public func jsonEncodedDetails(containing elementIdentifiers: [String]) -> [String: GenericJSON] {
         self.jsonEncodedDetailsInternal(containing: elementIdentifiers)
     }
@@ -75,8 +76,7 @@ extension JwtVc {
 
     /// Access the specified claims from the W3C VCDM credential (not including the JWT envelope).
     public func credentialClaims(containing claimNames: [String]) -> [String: GenericJSON] {
-        self.credentialClaims().filter {
-            (key, _) in
+        self.credentialClaims().filter { (key, _) in
             claimNames.contains(key)
         }
     }
@@ -103,8 +103,7 @@ extension JsonVc {
 
     /// Access the specified claims from the W3C VCDM credential.
     public func credentialClaims(containing claimNames: [String]) -> [String: GenericJSON] {
-        self.credentialClaims().filter {
-            (key, _) in
+        self.credentialClaims().filter { (key, _) in
             claimNames.contains(key)
         }
     }

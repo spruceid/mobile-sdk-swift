@@ -8,7 +8,6 @@ public class CredentialStore {
         self.credentials = credentials
     }
 
-    // swiftlint:disable force_cast
     public func presentMdocBLE(deviceEngagement: DeviceEngagement,
                                callback: BLESessionStateDelegate,
                                useL2CAP: Bool = true
@@ -24,5 +23,4 @@ public class CredentialStore {
             return nil
         }
     }
-    // swiftlint:enable force_cast
 }

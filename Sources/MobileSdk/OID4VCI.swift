@@ -4,7 +4,7 @@ import SpruceIDMobileSdkRs
 
 public class Oid4vciSyncHttpClient: SyncHttpClient {
     public init() {}
-    
+
     public func httpClient(request: HttpRequest) throws -> HttpResponse {
         guard let url = URL(string: request.url) else {
             throw HttpClientError.Other(error: "failed to construct URL")

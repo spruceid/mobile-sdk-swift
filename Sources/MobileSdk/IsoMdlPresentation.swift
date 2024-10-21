@@ -19,7 +19,7 @@ public class IsoMdlPresentation {
     var bleManager: MDocHolderBLECentral!
     var useL2CAP: Bool
 
-    init?(
+    public init?(
         mdoc: MDoc, engagement: DeviceEngagement,
         callback: BLESessionStateDelegate, useL2CAP: Bool
     ) async {

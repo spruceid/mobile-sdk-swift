@@ -28,7 +28,7 @@ public class CredentialPack {
     }
 
     /// Add an SD-JWT to the CredentialPack.
-    public func addSdJwt(sdJwt: SdJwt) -> [ParsedCredential] {
+    public func addSdJwt(sdJwt: Vcdm2SdJwt) -> [ParsedCredential] {
         credentials.append(ParsedCredential.newSdJwt(sdJwtVc: sdJwt))
         return credentials
     }
@@ -68,7 +68,7 @@ public class CredentialPack {
                     } else {
                         var type: String
                         do {
-                            type = try credential.intoGenericForm().type()
+                            type = try credential.intoGenericForm().type
                         } catch {
                             type = "unknown"
                         }

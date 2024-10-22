@@ -109,11 +109,11 @@ public extension JsonVc {
     }
 }
 
-public extension SdJwt {
+public extension Vcdm2SdJwt {
     /// Access the SD-JWT decoded credential
     func credentialClaims() -> [String: GenericJSON] {
         do {
-            if let data = try decodeRevealJsonString().data(using: .utf8) {
+            if let data = try revealedClaimsAsJsonString().data(using: .utf8) {
                 do {
                     let json = try JSONDecoder().decode(GenericJSON.self, from: data)
                     if let object = json.dictValue {
@@ -128,7 +128,7 @@ public extension SdJwt {
         } catch let error as NSError {
             print("failed to decode SD-JWT data from UTF-8: \(error)")
         }
-        
+
         return [:]
     }
 

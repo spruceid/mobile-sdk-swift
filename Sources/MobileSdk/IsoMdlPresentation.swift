@@ -52,12 +52,14 @@ public class IsoMdlPresentation {
     public func submitNamespaces(items: [String: [String: [String]]]) {
         do {
             let payload = try session.generateResponse(permittedItems: items)
-            let query =
-                [
-                    kSecClass: kSecClassKey,
-                    kSecAttrApplicationLabel: self.mdoc.keyAlias,
-                    kSecReturnRef: true
-                ] as [String: Any]
+
+            let tag = self.mdoc.keyAlias.data(using: .utf8)!
+            let query: [String: Any] = [
+                kSecClass as String: kSecClassKey,
+                kSecAttrApplicationTag as String: tag,
+                kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
+                kSecReturnRef as String: true,
+            ]
 
             // Find and cast the result as a SecKey instance.
             var item: CFTypeRef?

@@ -20,7 +20,7 @@ public class MDoc: Credential {
     self.keyAlias = keyAlias
     do {
       try self.inner = SpruceIDMobileSdkRs.Mdoc.fromCborEncodedDocument(
-        cborEncodedDocument: issuerAuth, keyAlias: keyAlias)
+        cborEncodedDocument: mdocBytes, keyAlias: keyAlias)
     } catch {
       print("\(error)")
       return nil

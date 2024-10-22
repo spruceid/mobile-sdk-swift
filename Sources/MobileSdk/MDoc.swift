@@ -15,7 +15,7 @@ public class MDoc: Credential {
   /// IssuerSignedItemBytes will be bytes, but its composition is defined here
   /// https://github.com/spruceid/isomdl/blob/f7b05dfa/src/definitions/issuer_signed.rs#L18
   public init?(
-    fromMDoc issuerAuth: Data, keyAlias: String
+    fromMDoc mdocBytes: Data, keyAlias: String
   ) {
     self.keyAlias = keyAlias
     do {

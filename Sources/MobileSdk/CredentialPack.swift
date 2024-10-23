@@ -64,7 +64,11 @@ public class CredentialPack {
                             claims = jsonVc.credentialClaims(containing: claimNames)
                         }
                     } else if let sdJwt = credential.asSdJwt() {
-                        claims = sdJwt.credentialClaims(containing: claimNames)
+                        if claimNames.isEmpty {
+                            claims = sdJwt.credentialClaims()
+                        } else {
+                            claims = sdJwt.credentialClaims(containing: claimNames)
+                        }
                     } else {
                         var type: String
                         do {

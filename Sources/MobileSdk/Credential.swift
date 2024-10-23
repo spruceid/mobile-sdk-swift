@@ -134,8 +134,8 @@ public extension Vcdm2SdJwt {
 
     /// Access the specified claims from the SD-JWT credential.
     func credentialClaims(containing claimNames: [String]) -> [String: GenericJSON] {
-        credentialClaims().filter {
-            key, _ in claimNames.contains(key)
+        credentialClaims().filter { key, _ in
+            claimNames.contains(key)
         }
     }
 }
